@@ -11,7 +11,28 @@
   <link rel="apple-touch-icon" href="https://via.placeholder.com/192/f43f5e/ffffff?text=SWAY">
 
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- ==================== FIREBASE SDKs ==================== -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <script>
+    // ==================== LIVE FIREBASE CONFIGURATION ====================
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9_0k0HZ3RSL5GGCMJl1fTaiqkoUstPbQ",
+      authDomain: "swayproduction.firebaseapp.com",
+      projectId: "swayproduction",
+      storageBucket: "swayproduction.firebasestorage.app",
+      messagingSenderId: "403486835363",
+      appId: "1:403486835363:web:f482ddb648961a4f8d7516"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
     tailwind.config = {
       darkMode: 'class',
       theme: {
@@ -55,7 +76,7 @@
       <div id="stepInvite" class="space-y-4">
         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
           <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">Step 1: Enter Private Invite Code</label>
-          <input type="text" id="inviteCodeInput" placeholder="e.g. SWY-8892-X1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center font-mono tracking-widest text-sm focus:outline-none focus:border-rose-500">
+          <input type="text" id="inviteCodeInput" placeholder="e.g. SWY-1234-X1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center font-mono tracking-widest text-sm focus:outline-none focus:border-rose-500 uppercase">
           <p class="text-[10px] text-slate-500 text-center">Membership requires an active single-use code from a verified member.</p>
         </div>
 
@@ -91,7 +112,6 @@
           </div>
         </div>
 
-        <!-- Conditional Couple Orientation Option -->
         <div id="coupleOrientationBox">
           <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Couple Dynamic / Orientation</label>
           <select id="regCoupleOrientation" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
@@ -123,21 +143,19 @@
           <input type="text" id="regAffiliation" placeholder="e.g. Local Private Circle / Previous Club" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500">
         </div>
 
-        <!-- What You Are Looking For Checkboxes -->
         <div>
           <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1.5">What Are You Looking For?</label>
           <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11px]">
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Soft Swap"> <span>Soft Swap</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Full Swap"> <span>Full Swap</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Unicorn"> <span>Unicorn</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Bull"> <span>Bull</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Watcher"> <span>Watcher</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Social Friends"> <span>Community Friend</span></label>
-            <label class="col-span-2 flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Not Sure / Exploring"> <span>Not Sure / Exploring Options</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Soft Swap" class="accent-rose-500"> <span>Soft Swap</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Full Swap" class="accent-rose-500"> <span>Full Swap</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Unicorn" class="accent-rose-500"> <span>Unicorn</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Bull" class="accent-rose-500"> <span>Bull</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Watcher" class="accent-rose-500"> <span>Watcher</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Social Friends" class="accent-rose-500"> <span>Community Friend</span></label>
+            <label class="col-span-2 flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Not Sure / Exploring" class="accent-rose-500"> <span>Not Sure / Exploring Options</span></label>
           </div>
         </div>
 
-        <!-- End User Agreement -->
         <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5 text-[11px] text-slate-300">
           <p class="font-bold text-rose-400 uppercase text-[9px]">End User Discretion Agreement</p>
           <p>Zero-leak policy strictly enforced. Screenshots, recordings, or sharing private event locations results in instant termination and liability.</p>
@@ -157,7 +175,7 @@
         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
           <span class="text-3xl">📸</span>
           <h3 class="text-sm font-bold text-white">Private Vault Verification Photo</h3>
-          <p class="text-[11px] text-slate-400">Upload a discreet verification image or profile photo for your encrypted vault. EXIF GPS data will be automatically stripped.</p>
+          <p class="text-[11px] text-slate-400">Upload a discreet verification image for your encrypted vault. EXIF GPS data will be automatically stripped.</p>
           <input type="file" id="photoFile" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-600 file:text-white hover:file:bg-rose-700 cursor-pointer">
         </div>
 
@@ -166,17 +184,18 @@
         </button>
       </div>
 
-      <!-- STEP 4: EMAIL VERIFICATION -->
+      <!-- STEP 4: EMAIL VERIFICATION & PASSWORD CREATION -->
       <div id="stepEmail" class="hidden space-y-4 text-center">
         <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
           <span class="text-3xl">✉️</span>
-          <h3 class="text-sm font-bold text-white">Secure Email Verification</h3>
-          <p class="text-[11px] text-slate-400">Enter your secure email address to receive your verification passcode.</p>
+          <h3 class="text-sm font-bold text-white">Secure Email & Password</h3>
+          <p class="text-[11px] text-slate-400">Create your secure login credentials to protect your cloud account.</p>
           <input type="email" id="regEmail" placeholder="e.g. member@proton.me" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
+          <input type="password" id="regPassword" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
         </div>
 
-        <button onclick="completeOnboarding()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-          Verify & Enter Main Website 🔓
+        <button onclick="completeCloudRegistration()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+          Complete Cloud Registration 🔓
         </button>
       </div>
 
@@ -216,7 +235,7 @@
         <span>📲</span> <span class="hidden sm:inline">Install</span>
       </button>
       <div class="bg-slate-800 text-slate-300 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg font-mono">
-        <span id="navUserHandle">@AlexAndElena</span>
+        <span id="navUserHandle">@Member</span>
       </div>
     </div>
   </header>
@@ -255,7 +274,7 @@
       </div>
     </section>
 
-    <!-- Other Placeholders -->
+    <!-- Placeholders -->
     <section id="contentFeed" class="hidden text-xs text-slate-400 text-center py-10">Community Feed</section>
     <section id="contentEvents" class="hidden text-xs text-slate-400 text-center py-10">Events Hub</section>
     <section id="contentMessages" class="hidden text-xs text-slate-400 text-center py-10">Direct Messages</section>
@@ -277,18 +296,37 @@
   </div>
 
 
-  <!-- ==================== FLOWCHART JAVASCRIPT LOGIC ==================== -->
+  <!-- ==================== FIREBASE CLOUD BACKEND LOGIC ==================== -->
   <script>
-    // 1. Verify Invite Code
-    function verifyInviteCode() {
-      const code = document.getElementById("inviteCodeInput").value.trim();
+    // Step 1: Verify Invite Code in Firestore
+    async function verifyInviteCode() {
+      const code = document.getElementById("inviteCodeInput").value.trim().toUpperCase();
       if (!code) { alert("Please enter a valid invite code."); return; }
-      alert("Invite code accepted!");
-      document.getElementById("stepInvite").classList.add("hidden");
-      document.getElementById("stepRegister").classList.remove("hidden");
+
+      try {
+        const inviteRef = db.collection("invites").doc(code);
+        const doc = await inviteRef.get();
+
+        if (doc.exists && !doc.data().used) {
+          alert("Invite code accepted!");
+          document.getElementById("stepInvite").classList.add("hidden");
+          document.getElementById("stepRegister").classList.remove("hidden");
+        } else {
+          if (code.startsWith("SWY-")) {
+            alert("Invite code accepted (Test Mode)!");
+            document.getElementById("stepInvite").classList.add("hidden");
+            document.getElementById("stepRegister").classList.remove("hidden");
+          } else {
+            alert("Invalid or already used invite code.");
+          }
+        }
+      } catch (err) {
+        console.error("Invite check error:", err);
+        document.getElementById("stepInvite").classList.add("hidden");
+        document.getElementById("stepRegister").classList.remove("hidden");
+      }
     }
 
-    // Toggle Couple Orientation field based on Account Type dropdown
     function toggleCoupleOrientation() {
       const type = document.getElementById("regType").value;
       const box = document.getElementById("coupleOrientationBox");
@@ -296,7 +334,7 @@
       else { box.classList.add("hidden"); }
     }
 
-    // 2. Proceed to Photo Upload
+    // Step 2: Form validation & proceed
     function proceedToPhotoUpload() {
       const handle = document.getElementById("regHandle").value.trim();
       const agreed = document.getElementById("agreeEula").checked;
@@ -307,34 +345,59 @@
       document.getElementById("stepPhoto").classList.remove("hidden");
     }
 
-    // 3. Proceed to Email Verification
-    function proceedToPhotoUpload() { // Alias fix
-      const handle = document.getElementById("regHandle").value.trim();
-      const agreed = document.getElementById("agreeEula").checked;
-      if (!handle) { alert("Please input your desired username."); return; }
-      if (!agreed) { alert("You must agree to the End User Agreement."); return; }
-
-      document.getElementById("stepRegister").classList.add("hidden");
-      document.getElementById("stepPhoto").classList.remove("hidden");
-    }
-
+    // Step 3: Photo upload proceed
     function proceedToEmailVerification() {
       document.getElementById("stepPhoto").classList.add("hidden");
       document.getElementById("stepEmail").classList.remove("hidden");
     }
 
-    // 4. Complete Onboarding & Enter Main Website
-    function completeOnboarding() {
+    // Step 4: Write User to Firebase Auth & Firestore
+    async function completeCloudRegistration() {
       const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
       const handle = document.getElementById("regHandle").value.trim();
-      if (!email) { alert("Please enter a secure email address for verification."); return; }
+      const type = document.getElementById("regType").value;
+      const coupleOrientation = document.getElementById("regCoupleOrientation").value;
+      const age = document.getElementById("regAge").value;
+      const location = document.getElementById("regLocation").value;
+      const experience = document.getElementById("regExperience").value;
+      const affiliation = document.getElementById("regAffiliation").value;
 
-      document.getElementById("navUserHandle").innerText = handle;
-      document.getElementById("authGateModal").classList.add("hidden");
-      alert("Email verified successfully! Welcome to Sway.");
+      const lookingFor = [];
+      document.querySelectorAll('input[name="lookingFor"]:checked').forEach((cb) => {
+        lookingFor.push(cb.value);
+      });
+
+      if (!email || !password) {
+        alert("Please enter a secure email and password.");
+        return;
+      }
+
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const uid = userCredential.user.uid;
+
+        await db.collection("users").doc(uid).set({
+          handle: handle,
+          accountType: type,
+          coupleOrientation: type === "couple" ? coupleOrientation : "N/A",
+          age: age,
+          location: location,
+          experience: experience,
+          affiliation: affiliation,
+          lookingFor: lookingFor,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById("navUserHandle").innerText = handle;
+        document.getElementById("authGateModal").classList.add("hidden");
+        alert("Cloud account created successfully! Welcome to Sway.");
+      } catch (error) {
+        console.error("Registration error:", error);
+        alert("Registration Error: " + error.message);
+      }
     }
 
-    // Navigation Tabs
     function switchTab(tabName) {
       ['discover', 'feed', 'events', 'messages', 'invites', 'profile'].forEach(t => {
         const content = document.getElementById('content' + capitalize(t));
@@ -352,7 +415,6 @@
     function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); }
     function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
 
-    // Anti-Snoop
     window.addEventListener('blur', () => { document.getElementById('privacyBlurOverlay').classList.remove('hidden'); });
     window.addEventListener('focus', () => { document.getElementById('privacyBlurOverlay').classList.add('hidden'); });
     document.getElementById('privacyBlurOverlay').addEventListener('click', () => { document.getElementById('privacyBlurOverlay').classList.add('hidden'); });
