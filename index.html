@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sway — Where discretion meets connection</title>
 
-  <!-- PWA Manifest & Mobile Theme Configuration -->
   <meta name="theme-color" content="#020617">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="https://via.placeholder.com/192/f43f5e/ffffff?text=SWAY">
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -27,7 +25,6 @@
   </script>
 
   <style>
-    /* Security: Disable text and image selection */
     body {
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -39,21 +36,167 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col items-center justify-start antialiased selection:bg-rose-500 selection:text-white transition-all duration-300">
 
-  <!-- ==================== ANTI-SNOOP / DISCRETION OVERLAY ==================== -->
+  <!-- ==================== FLOWCHART ONBOARDING GATE ==================== -->
+  <div id="authGateModal" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4 overflow-y-auto">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-auto">
+      
+      <!-- Logo & Tagline -->
+      <div class="flex flex-col items-center space-y-2 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-xl shadow-rose-900/50 border border-rose-400/30">
+          <svg class="w-8 h-8 text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18.2 9.5a5.5 5.5 0 00-9.7-3.1c-1.1 1.3-1.3 3.1-.4 4.6 1 1.7 3.3 2.5 4.3 4.2 1 1.5.8 3.5-.6 4.8a5.5 5.5 0 01-8.2-7.1"></path>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-black tracking-wider uppercase bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent">Sway</h1>
+        <p class="text-xs text-rose-400 font-medium">Where discretion meets connection</p>
+      </div>
+
+      <!-- STEP 1: INSERT INVITE CODE -->
+      <div id="stepInvite" class="space-y-4">
+        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">Step 1: Enter Private Invite Code</label>
+          <input type="text" id="inviteCodeInput" placeholder="e.g. SWY-8892-X1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center font-mono tracking-widest text-sm focus:outline-none focus:border-rose-500">
+          <p class="text-[10px] text-slate-500 text-center">Membership requires an active single-use code from a verified member.</p>
+        </div>
+
+        <button onclick="verifyInviteCode()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+          Verify Invite Code →
+        </button>
+      </div>
+
+      <!-- STEP 2: DETAILED REGISTRATION PROFILE -->
+      <div id="stepRegister" class="hidden space-y-3 text-xs max-h-[70vh] overflow-y-auto pr-1">
+        <div class="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl text-emerald-300 text-[11px] text-center font-medium">
+          ✓ Code Verified. Complete your confidential profile.
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Desired Username / Handle</label>
+          <input type="text" id="regHandle" placeholder="e.g. @AlexAndElena" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Account Type</label>
+            <select id="regType" onchange="toggleCoupleOrientation()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
+              <option value="couple">Couple</option>
+              <option value="unicorn">Unicorn (Single F)</option>
+              <option value="bull">Bull (Single M)</option>
+              <option value="watcher">Watcher / Single</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Age(s)</label>
+            <input type="text" id="regAge" placeholder="e.g. 32 / 30" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
+          </div>
+        </div>
+
+        <!-- Conditional Couple Orientation Option -->
+        <div id="coupleOrientationBox">
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Couple Dynamic / Orientation</label>
+          <select id="regCoupleOrientation" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
+            <option>M/F (Bi-Curious Female)</option>
+            <option>M/F (Bi-Curious Both)</option>
+            <option>M/F (Straight / Open)</option>
+            <option>M/M Couple</option>
+            <option>F/F Couple</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Location</label>
+            <input type="text" id="regLocation" placeholder="Manila, PH" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Experience Level</label>
+            <select id="regExperience" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
+              <option>Newbie / Exploring</option>
+              <option>With Experience</option>
+              <option>Community Veteran</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Community Group Affiliation</label>
+          <input type="text" id="regAffiliation" placeholder="e.g. Local Private Circle / Previous Club" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500">
+        </div>
+
+        <!-- What You Are Looking For Checkboxes -->
+        <div>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1.5">What Are You Looking For?</label>
+          <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11px]">
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Soft Swap"> <span>Soft Swap</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Full Swap"> <span>Full Swap</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Unicorn"> <span>Unicorn</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Bull"> <span>Bull</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Watcher"> <span>Watcher</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Social Friends"> <span>Community Friend</span></label>
+            <label class="col-span-2 flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" class="accent-rose-500" value="Not Sure / Exploring"> <span>Not Sure / Exploring Options</span></label>
+          </div>
+        </div>
+
+        <!-- End User Agreement -->
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5 text-[11px] text-slate-300">
+          <p class="font-bold text-rose-400 uppercase text-[9px]">End User Discretion Agreement</p>
+          <p>Zero-leak policy strictly enforced. Screenshots, recordings, or sharing private event locations results in instant termination and liability.</p>
+          <label class="flex items-start space-x-2 pt-1 cursor-pointer">
+            <input type="checkbox" id="agreeEula" class="mt-0.5 rounded accent-rose-500">
+            <span class="text-white">I am 18+ and agree to all consent & zero-leak policies.</span>
+          </label>
+        </div>
+
+        <button onclick="proceedToPhotoUpload()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+          Continue to Vault Photo Upload →
+        </button>
+      </div>
+
+      <!-- STEP 3: PHOTO UPLOAD -->
+      <div id="stepPhoto" class="hidden space-y-4 text-center">
+        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+          <span class="text-3xl">📸</span>
+          <h3 class="text-sm font-bold text-white">Private Vault Verification Photo</h3>
+          <p class="text-[11px] text-slate-400">Upload a discreet verification image or profile photo for your encrypted vault. EXIF GPS data will be automatically stripped.</p>
+          <input type="file" id="photoFile" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-600 file:text-white hover:file:bg-rose-700 cursor-pointer">
+        </div>
+
+        <button onclick="proceedToEmailVerification()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+          Upload & Verify Email →
+        </button>
+      </div>
+
+      <!-- STEP 4: EMAIL VERIFICATION -->
+      <div id="stepEmail" class="hidden space-y-4 text-center">
+        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+          <span class="text-3xl">✉️</span>
+          <h3 class="text-sm font-bold text-white">Secure Email Verification</h3>
+          <p class="text-[11px] text-slate-400">Enter your secure email address to receive your verification passcode.</p>
+          <input type="email" id="regEmail" placeholder="e.g. member@proton.me" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
+        </div>
+
+        <button onclick="completeOnboarding()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+          Verify & Enter Main Website 🔓
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ==================== ANTI-SNOOP OVERLAY ==================== -->
   <div id="privacyBlurOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center space-y-3">
     <div class="w-12 h-12 bg-rose-500/20 rounded-full flex items-center justify-center border border-rose-500/30">
       <svg class="w-7 h-7 text-rose-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
     </div>
     <h3 class="text-lg font-bold text-white">Sway Protected Mode</h3>
-    <p class="text-xs text-slate-400 max-w-xs">App content is hidden while out of focus to protect member discretion and privacy.</p>
-    <p class="text-[10px] text-rose-400 font-mono">Tap anywhere to return</p>
+    <p class="text-xs text-slate-400 max-w-xs">App content is hidden while out of focus to protect privacy.</p>
   </div>
 
 
   <!-- ==================== TOP NAVIGATION BAR ==================== -->
   <header class="w-full max-w-2xl bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-lg">
     <div class="flex items-center space-x-2.5">
-      <!-- Custom Glowing Dual-Monogram 'S' Logo -->
       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-lg shadow-rose-900/40 border border-rose-400/30">
         <svg class="w-5 h-5 text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18.2 9.5a5.5 5.5 0 00-9.7-3.1c-1.1 1.3-1.3 3.1-.4 4.6 1 1.7 3.3 2.5 4.3 4.2 1 1.5.8 3.5-.6 4.8a5.5 5.5 0 01-8.2-7.1"></path>
@@ -66,18 +209,12 @@
     </div>
 
     <div class="flex items-center space-x-2">
-      <!-- Admin Controls Button -->
-      <button onclick="openAdminModal()" id="adminNavBtn" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs px-2.5 py-1.5 rounded-lg font-bold transition flex items-center space-x-1">
-        <span>👑</span>
-        <span class="hidden sm:inline">Admin</span>
+      <button onclick="openAdminModal()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs px-2.5 py-1.5 rounded-lg font-bold transition flex items-center space-x-1">
+        <span>👑</span> <span class="hidden sm:inline">Admin</span>
       </button>
-
-      <!-- PWA Install Button -->
       <button id="pwaInstallBtn" onclick="triggerPWAInstall()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center space-x-1">
-        <span>📲</span>
-        <span class="hidden sm:inline">Install</span>
+        <span>📲</span> <span class="hidden sm:inline">Install</span>
       </button>
-
       <div class="bg-slate-800 text-slate-300 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg font-mono">
         <span id="navUserHandle">@AlexAndElena</span>
       </div>
@@ -85,378 +222,119 @@
   </header>
 
 
-  <!-- ==================== ACCOUNT WARNING BANNER ==================== -->
-  <div id="accountWarningBanner" class="hidden w-full max-w-2xl bg-amber-500/10 border-b border-amber-500/30 p-3 text-xs text-amber-300 flex items-center justify-between">
-    <div class="flex items-center space-x-2">
-      <span>⚠️</span>
-      <span><strong>Inviter Tree Notice:</strong> An invitee in your chain received flags and was restricted. Your inviter trust rating was updated.</span>
-    </div>
-    <button onclick="dismissBanner()" class="text-amber-400 hover:text-white font-bold ml-2">✕</button>
-  </div>
-
-
-  <!-- ==================== MANDATORY TERMS & EULA MODAL ==================== -->
-  <div id="disclaimerModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-500 border border-rose-500/30">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18.2 9.5a5.5 5.5 0 00-9.7-3.1c-1.1 1.3-1.3 3.1-.4 4.6 1 1.7 3.3 2.5 4.3 4.2 1 1.5.8 3.5-.6 4.8a5.5 5.5 0 01-8.2-7.1"></path></svg>
-        </div>
-        <div>
-          <h2 class="text-base font-bold text-white">Welcome to Sway</h2>
-          <p class="text-[11px] text-rose-400 font-medium">Where discretion meets connection</p>
-        </div>
-      </div>
-      
-      <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-3 max-h-52 overflow-y-auto leading-relaxed">
-        <p><strong>1. Age Verification:</strong> You confirm you are at least 18 years of age (or legal majority) to enter this private social network.</p>
-        <p><strong>2. Explicit Voluntary Consent:</strong> All interactions, events, and media sharing require voluntary consent. Harassment results in immediate termination.</p>
-        <p><strong>3. Zero-Leak Policy:</strong> Screenshots, recording, or leaking private vault photos or event addresses carries legal civil liability.</p>
-        <p><strong>4. Vouch Accountability:</strong> Peer vouches reflect real community trust. Vouching for policy violators directly affects your own invite chain score.</p>
-      </div>
-
-      <label class="flex items-start space-x-2 text-xs text-slate-300 cursor-pointer pt-2">
-        <input type="checkbox" id="agreeCheck" class="mt-0.5 rounded accent-rose-500">
-        <span>I am 18+ and agree to Sway guidelines, consent policies, and zero-leak terms.</span>
-      </label>
-
-      <button onclick="acceptDisclaimer()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-lg shadow-rose-900/30">
-        Enter Private Platform
-      </button>
-    </div>
-  </div>
-
-
-  <!-- ==================== ADMIN CONTROL PANEL MODAL ==================== -->
-  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-amber-500/40 p-6 rounded-2xl space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <div class="flex items-center space-x-2">
-          <span>👑</span>
-          <h3 class="text-base font-bold text-amber-400">Admin Control Center</h3>
-        </div>
-        <button onclick="closeAdminModal()" class="text-slate-500 hover:text-white text-xs">✕ Close</button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <h4 class="font-bold text-white uppercase text-[10px] tracking-wider text-slate-400">Grant Extra Code to Member</h4>
-        
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Target Member Username / ID</label>
-          <input type="text" id="adminTargetUser" placeholder="e.g. @SofiaAndDavid" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-amber-500">
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Custom Prefix (Optional)</label>
-          <input type="text" id="adminCodePrefix" placeholder="e.g. VIP-GOLD" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-amber-500">
-        </div>
-
-        <button onclick="executeAdminCodeGrant()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-amber-900/30">
-          ⚡ Generate & Issue Admin Code
-        </button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ==================== PEER VOUCH & RATING MODAL ==================== -->
-  <div id="vouchModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <div>
-          <h3 class="text-base font-bold text-white">Vouch & Rate Member</h3>
-          <p id="vouchTargetHandle" class="text-xs text-rose-400 font-mono">@SofiaAndDavid</p>
-        </div>
-        <button onclick="closeVouchModal()" class="text-slate-500 hover:text-white text-xs">✕ Close</button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl text-rose-300 text-[11px] leading-relaxed">
-          🤝 <strong>Peer Accountability:</strong> Only vouch for members you have interacted with or met in person. Vouches elevate community trust ratings!
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">1. Respect & Boundaries</label>
-          <select class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-            <option value="5">5/5 — Excellent Communication & Respect</option>
-            <option value="4">4/5 — Good Boundaries</option>
-            <option value="3">3/5 — Neutral / Acceptable</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">2. Discretion & Privacy</label>
-          <select class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-            <option value="5">5/5 — 100% Discreet & Confidential</option>
-            <option value="4">4/5 — Discreet</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">3. Profile Accuracy</label>
-          <select class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-            <option value="5">5/5 — 100% Accurate Photos & Info</option>
-            <option value="4">4/5 — Mostly Accurate</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">4. Overall Vibe & Chemistry</label>
-          <select class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-            <option value="5">5/5 — Exceptional Member / Highly Recommended</option>
-            <option value="4">4/5 — Great Interaction</option>
-          </select>
-        </div>
-
-        <button onclick="submitVouchAndRating()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-          ⭐ Submit Vouch & Community Score
-        </button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ==================== CONFIDENTIAL REPORT / INCIDENT MODAL ==================== -->
-  <div id="reportModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-red-500/40 p-6 rounded-2xl space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <div>
-          <h3 class="text-base font-bold text-red-400">Report Member / Flag Incident</h3>
-          <p id="reportTargetHandle" class="text-xs text-slate-400 font-mono">@TargetUser</p>
-        </div>
-        <button onclick="closeReportModal()" class="text-slate-500 hover:text-white text-xs">✕ Close</button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div class="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-red-300 text-[11px] leading-relaxed">
-          🛡️ <strong>100% Confidentiality:</strong> Reports are sent only to site admins and event hosts. The target member will never see who submitted a flag.
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Select Incident Type</label>
-          <select id="reportCategory" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-red-500">
-            <option value="boundary">🚫 Boundary / Consent Violation (Immediate Review)</option>
-            <option value="mismatch">📸 Photos / Info Did Not Match Reality</option>
-            <option value="discretion">🕵️ Privacy / Discretion Breach Attempt</option>
-            <option value="noshow">🚪 Event No-Show or Unexcused Cancellation</option>
-            <option value="conduct">💬 Aggressive / Unsolicited Behavior in DMs</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Incident Context (Private to Admins)</label>
-          <textarea id="reportDetails" placeholder="Briefly describe what occurred..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-red-500 resize-none h-20"></textarea>
-        </div>
-
-        <button onclick="submitNegativeReport()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-red-900/30">
-          🚩 Submit Confidential Incident Report
-        </button>
-      </div>
-    </div>
-  </div>
-
-
   <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
   <main class="w-full max-w-2xl px-4 py-4 mb-20 flex-1">
 
-    <!-- NAVIGATION TABS -->
     <nav class="flex border-b border-slate-800 mb-6 text-xs sm:text-sm font-semibold text-center overflow-x-auto">
       <button onclick="switchTab('discover')" id="tabDiscover" class="flex-1 min-w-[70px] py-3 text-rose-500 border-b-2 border-rose-500 transition">Discover</button>
       <button onclick="switchTab('feed')" id="tabFeed" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">Feed</button>
       <button onclick="switchTab('events')" id="tabEvents" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">Events</button>
-      <button onclick="switchTab('messages')" id="tabMessages" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition relative">
-        Messages <span class="bg-rose-500 text-white text-[9px] px-1.5 py-0.5 rounded-full ml-1">2</span>
-      </button>
+      <button onclick="switchTab('messages')" id="tabMessages" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition relative">Messages</button>
       <button onclick="switchTab('invites')" id="tabInvites" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">Invites</button>
       <button onclick="switchTab('profile')" id="tabProfile" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">My Profile</button>
     </nav>
 
-
-    <!-- ==================== TAB 1: DISCOVERY DECK ==================== -->
+    <!-- DISCOVERY DECK -->
     <section id="contentDiscover" class="space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
-        
-        <!-- Photo Container with Security Overlay -->
         <div class="relative h-72 sm:h-80 bg-slate-950 flex items-center justify-center overflow-hidden select-none">
-          <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-25 filter blur-xl" alt="Vault Media">
-          
+          <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-25 filter blur-xl" alt="Vault">
           <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-
-          <!-- Dynamic Watermark -->
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 rotate-[-25deg]">
-            <span class="text-slate-300 font-mono text-xs font-bold tracking-widest uppercase">SWAY • VIEWED BY @AlexAndElena • NO SCREENSHOTS</span>
-          </div>
           
-          <!-- Blurred Vault Overlay -->
           <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-2 z-10">
             <span class="text-3xl">🔒</span>
             <p class="font-bold text-sm text-slate-200">Private Vault Protected</p>
-            <p class="text-xs text-slate-400 max-w-xs">Photos are encrypted. Request vault permission to view media.</p>
-            <button onclick="alert('Vault permission request sent!')" class="mt-2 bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-xs px-4 py-2 rounded-xl border border-rose-500/50 shadow-lg transition">
-              Request Vault Access
-            </button>
-          </div>
-
-          <!-- Vouch Badges Overlay -->
-          <div class="absolute top-3 left-3 z-20 flex flex-wrap gap-1.5">
-            <span class="bg-slate-900/90 backdrop-blur-md text-amber-300 border border-amber-500/40 text-[10px] px-2.5 py-1 rounded-full font-bold flex items-center space-x-1">
-              <span>⭐ 4.9</span>
-              <span class="text-slate-400 font-normal">• Vouched by 5 Members</span>
-            </span>
-            <span class="bg-slate-900/90 backdrop-blur-md text-emerald-400 border border-emerald-500/30 text-[10px] px-2.5 py-1 rounded-full font-bold">✓ Vetted</span>
+            <button onclick="alert('Vault permission request sent!')" class="mt-2 bg-rose-600 hover:bg-rose-600 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-lg transition">Request Vault Access</button>
           </div>
         </div>
 
-        <!-- Profile Card Information -->
         <div class="p-5 space-y-3">
-          <div class="flex justify-between items-start">
-            <div>
-              <h2 class="text-xl font-bold text-white">Sofia & David <span class="text-rose-400 font-normal text-base">(31 / 34)</span></h2>
-              <p class="text-xs text-rose-400 font-semibold">Couple (M/F) • Manila, PH</p>
-            </div>
-            
-            <div class="flex space-x-1">
-              <button onclick="openVouchModal('@SofiaAndDavid')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs px-2.5 py-1 rounded-xl font-medium transition flex items-center space-x-1">
-                <span>🤝</span> <span>Vouch</span>
-              </button>
-              <button onclick="openReportModal('@SofiaAndDavid')" class="bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-red-400 border border-slate-700 text-xs px-2 py-1 rounded-xl font-medium transition">
-                🚩
-              </button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800/80">
-            <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Orientation</span> Bisexual / Bi-Curious</div>
-            <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Experience</span> Community Veteran</div>
-            <div class="col-span-2"><span class="text-slate-500 block text-[10px] uppercase font-bold">Looking For</span> <span class="text-rose-300 font-medium">Unicorn, Couples, Social Lounge Friends</span></div>
-          </div>
-
-          <div class="flex space-x-3 pt-2">
-            <button onclick="alert('Swiped pass')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center space-x-1">
-              <span>✕</span> <span>Pass</span>
-            </button>
-            <button onclick="alert('Connection request sent!')" class="flex-1 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-rose-900/30 flex items-center justify-center space-x-1">
-              <span>♥</span> <span>Connect</span>
-            </button>
-          </div>
+          <h2 class="text-xl font-bold text-white">Sofia & David <span class="text-rose-400 font-normal text-base">(31 / 34)</span></h2>
+          <p class="text-xs text-rose-400 font-semibold">Couple (M/F) • Manila, PH</p>
         </div>
       </div>
     </section>
 
-
-    <!-- ==================== TAB 2: FEED ==================== -->
-    <section id="contentFeed" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3">
-        <textarea placeholder="Share a respectful thought, party advice, or community update..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-rose-500 resize-none h-20"></textarea>
-        <div class="flex justify-between items-center">
-          <span class="text-[10px] text-slate-500">🔒 Visible only to verified members</span>
-          <button class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition">Publish Post</button>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ==================== TAB 3: EVENTS & HOST SCREENING ==================== -->
-    <section id="contentEvents" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-lg">
-        <div class="flex justify-between items-start">
-          <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded-full border border-rose-500/30">🔒 Close Circle Party</span>
-          <span class="text-xs text-slate-400 font-mono">Oct 30 • 8:00 PM</span>
-        </div>
-        <div>
-          <h3 class="text-base font-bold text-white">Masquerade Cocktail & Social Lounge</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Host: @TheAtlasPair • Private Venue Location</p>
-        </div>
-
-        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-          <span class="text-[11px] font-bold text-rose-400 uppercase block">Host Guest Screening (1 Pending)</span>
-          
-          <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs border border-slate-800">
-            <div>
-              <p class="font-bold text-white">@Chris_And_Jen <span class="text-amber-300 text-[10px] font-normal ml-1">⭐ 4.9 (3 Vouches)</span></p>
-              <p class="text-[10px] text-emerald-400">100% Boundary Rating • 0 Flags</p>
-            </div>
-            <div class="flex space-x-1">
-              <button onclick="alert('Guest approved!')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">Approve</button>
-              <button onclick="alert('Guest declined.')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold px-2 py-1 rounded-lg">Decline</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ==================== TAB 4: MESSAGES & VAULT PERMISSIONS ==================== -->
-    <section id="contentMessages" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-rose-400">Vault Access Requests (1 Pending)</h3>
-        
-        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-          <div>
-            <p class="font-bold text-white">@Leo_SingleM</p>
-            <p class="text-[10px] text-slate-400">Requested access to view your Private Vault</p>
-          </div>
-          <div class="flex space-x-1">
-            <button onclick="alert('1-Time view granted!')" class="bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">1-Time View</button>
-            <button onclick="alert('Permanent access granted!')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold px-2 py-1 rounded-lg">Permanent</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ==================== TAB 5: INVITE MANAGER ==================== -->
-    <section id="contentInvites" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-lg">
-        <div class="flex justify-between items-center">
-          <div>
-            <h3 class="text-sm font-bold text-white">Weekly 3-Code Batch</h3>
-            <p class="text-xs text-slate-400">Codes reset every 7 days</p>
-          </div>
-          <span class="text-[11px] font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg">Resets in: 4d 12h</span>
-        </div>
-
-        <button onclick="generateInviteCode()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-lg shadow-rose-900/30">
-          + Generate New Invite Code
-        </button>
-
-        <div id="activeCodesList" class="space-y-2 pt-2">
-          <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono">
-            <div>
-              <span class="text-rose-400 font-bold block">SWY-8892-X1</span>
-              <span class="text-[10px] text-slate-500 font-sans">Active • Single-Use</span>
-            </div>
-            <button onclick="navigator.clipboard.writeText('SWY-8892-X1'); alert('Code copied!')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg font-sans text-[11px]">Copy</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ==================== TAB 6: PROFILE ==================== -->
-    <section id="contentProfile" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
-        <div class="flex justify-between items-start border-b border-slate-800 pb-3">
-          <div>
-            <h2 class="text-lg font-bold text-white">Alex & Elena <span class="text-rose-400 font-normal text-sm">(32 / 30)</span></h2>
-            <p class="text-xs text-rose-400 font-semibold">Couple (M/F) • Manila, PH</p>
-          </div>
-          <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">Verified Member</span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
-          <div><strong class="text-slate-500 block text-[10px] uppercase">Orientation:</strong> Bi-Curious</div>
-          <div><strong class="text-slate-500 block text-[10px] uppercase">Experience:</strong> Intermediate</div>
-          <div class="col-span-2"><strong class="text-slate-500 block text-[10px] uppercase">Looking For:</strong> <span class="text-rose-300 font-medium">Couples, Unicorns, Lounge Socials</span></div>
-        </div>
-      </div>
-    </section>
+    <!-- Other Placeholders -->
+    <section id="contentFeed" class="hidden text-xs text-slate-400 text-center py-10">Community Feed</section>
+    <section id="contentEvents" class="hidden text-xs text-slate-400 text-center py-10">Events Hub</section>
+    <section id="contentMessages" class="hidden text-xs text-slate-400 text-center py-10">Direct Messages</section>
+    <section id="contentInvites" class="hidden text-xs text-slate-400 text-center py-10">Invite Manager</section>
+    <section id="contentProfile" class="hidden text-xs text-slate-400 text-center py-10">Profile Settings</section>
 
   </main>
 
 
-  <!-- ==================== JAVASCRIPT APPLICATION LOGIC ==================== -->
+  <!-- ADMIN MODAL -->
+  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-amber-500/40 p-6 rounded-2xl space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-amber-400">Admin Control Center</h3>
+        <button onclick="closeAdminModal()" class="text-slate-500 hover:text-white text-xs">✕ Close</button>
+      </div>
+      <p class="text-xs text-slate-400">Admin management controls active.</p>
+    </div>
+  </div>
+
+
+  <!-- ==================== FLOWCHART JAVASCRIPT LOGIC ==================== -->
   <script>
+    // 1. Verify Invite Code
+    function verifyInviteCode() {
+      const code = document.getElementById("inviteCodeInput").value.trim();
+      if (!code) { alert("Please enter a valid invite code."); return; }
+      alert("Invite code accepted!");
+      document.getElementById("stepInvite").classList.add("hidden");
+      document.getElementById("stepRegister").classList.remove("hidden");
+    }
+
+    // Toggle Couple Orientation field based on Account Type dropdown
+    function toggleCoupleOrientation() {
+      const type = document.getElementById("regType").value;
+      const box = document.getElementById("coupleOrientationBox");
+      if (type === "couple") { box.classList.remove("hidden"); }
+      else { box.classList.add("hidden"); }
+    }
+
+    // 2. Proceed to Photo Upload
+    function proceedToPhotoUpload() {
+      const handle = document.getElementById("regHandle").value.trim();
+      const agreed = document.getElementById("agreeEula").checked;
+      if (!handle) { alert("Please input your desired username."); return; }
+      if (!agreed) { alert("You must agree to the End User Agreement to proceed."); return; }
+
+      document.getElementById("stepRegister").classList.add("hidden");
+      document.getElementById("stepPhoto").classList.remove("hidden");
+    }
+
+    // 3. Proceed to Email Verification
+    function proceedToPhotoUpload() { // Alias fix
+      const handle = document.getElementById("regHandle").value.trim();
+      const agreed = document.getElementById("agreeEula").checked;
+      if (!handle) { alert("Please input your desired username."); return; }
+      if (!agreed) { alert("You must agree to the End User Agreement."); return; }
+
+      document.getElementById("stepRegister").classList.add("hidden");
+      document.getElementById("stepPhoto").classList.remove("hidden");
+    }
+
+    function proceedToEmailVerification() {
+      document.getElementById("stepPhoto").classList.add("hidden");
+      document.getElementById("stepEmail").classList.remove("hidden");
+    }
+
+    // 4. Complete Onboarding & Enter Main Website
+    function completeOnboarding() {
+      const email = document.getElementById("regEmail").value.trim();
+      const handle = document.getElementById("regHandle").value.trim();
+      if (!email) { alert("Please enter a secure email address for verification."); return; }
+
+      document.getElementById("navUserHandle").innerText = handle;
+      document.getElementById("authGateModal").classList.add("hidden");
+      alert("Email verified successfully! Welcome to Sway.");
+    }
+
+    // Navigation Tabs
     function switchTab(tabName) {
       ['discover', 'feed', 'events', 'messages', 'invites', 'profile'].forEach(t => {
         const content = document.getElementById('content' + capitalize(t));
@@ -465,71 +343,19 @@
         if (btn) btn.className = 'flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition';
       });
 
-      const activeContent = document.getElementById('content' + capitalize(tabName));
-      const activeBtn = document.getElementById('tab' + capitalize(tabName));
-      if (activeContent) activeContent.classList.remove('hidden');
-      if (activeBtn) activeBtn.className = 'flex-1 min-w-[70px] py-3 text-rose-500 border-b-2 border-rose-500 font-bold transition';
+      document.getElementById('content' + capitalize(tabName)).classList.remove('hidden');
+      document.getElementById('tab' + capitalize(tabName)).className = 'flex-1 min-w-[70px] py-3 text-rose-500 border-b-2 border-rose-500 font-bold transition';
     }
 
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-    function acceptDisclaimer() {
-      if (!document.getElementById("agreeCheck").checked) {
-        alert("You must agree to the discretion terms to enter.");
-        return;
-      }
-      document.getElementById("disclaimerModal").classList.add("hidden");
-    }
-
     function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); }
     function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
-    function executeAdminCodeGrant() {
-      const target = document.getElementById("adminTargetUser").value;
-      if (!target) { alert("Please enter a target username."); return; }
-      alert("Admin invite code granted to " + target);
-      closeAdminModal();
-    }
 
-    function openVouchModal(handle) {
-      document.getElementById("vouchTargetHandle").innerText = handle;
-      document.getElementById("vouchModal").classList.remove("hidden");
-    }
-    function closeVouchModal() { document.getElementById("vouchModal").classList.add("hidden"); }
-    function submitVouchAndRating() {
-      alert("Peer Vouch & Reputation rating submitted!");
-      closeVouchModal();
-    }
-
-    function openReportModal(handle) {
-      document.getElementById("reportTargetHandle").innerText = handle;
-      document.getElementById("reportModal").classList.remove("hidden");
-    }
-    function closeReportModal() { document.getElementById("reportModal").classList.add("hidden"); }
-    function submitNegativeReport() {
-      alert("Confidential report submitted to admins and event hosts.");
-      document.getElementById("accountWarningBanner").classList.remove("hidden");
-      closeReportModal();
-    }
-
-    function dismissBanner() { document.getElementById("accountWarningBanner").classList.add("hidden"); }
-
-    function generateInviteCode() {
-      const code = 'SWY-' + Math.floor(1000 + Math.random() * 9000) + '-X' + Math.floor(1 + Math.random() * 9);
-      const list = document.getElementById("activeCodesList");
-      const div = document.createElement("div");
-      div.className = "flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono";
-      div.innerHTML = `<div><span class="text-rose-400 font-bold block">${code}</span><span class="text-[10px] text-slate-500 font-sans">Expires in 7 days</span></div><button onclick="navigator.clipboard.writeText('${code}'); alert('Code copied!')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg font-sans text-[11px]">Copy</button>`;
-      list.appendChild(div);
-    }
-
+    // Anti-Snoop
     window.addEventListener('blur', () => { document.getElementById('privacyBlurOverlay').classList.remove('hidden'); });
     window.addEventListener('focus', () => { document.getElementById('privacyBlurOverlay').classList.add('hidden'); });
     document.getElementById('privacyBlurOverlay').addEventListener('click', () => { document.getElementById('privacyBlurOverlay').classList.add('hidden'); });
-
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      alert("🔒 Sway Discretion Notice: Direct downloading and context menus are disabled.");
-    });
 
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
