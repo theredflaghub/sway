@@ -329,7 +329,7 @@
             <div class="flex space-x-1">
               <button id="leaveGroupBtn" onclick="leaveGroupChat()" class="hidden bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg text-[10px] font-bold">Leave Group ✕</button>
               <button id="addMembersBtn" onclick="openAddMemberModal()" class="hidden bg-slate-800 text-slate-200 border border-slate-700 px-2 py-1 rounded-lg text-[10px] font-bold">+ Member</button>
-              <button onclick="requestVaultAccessModal()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:bg-rose-600/30 transition">Request Vault Access</button>
+              <button id="requestVaultBtn" onclick="requestVaultAccessModal()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:bg-rose-600/30 transition">Request Vault Access</button>
             </div>
           </div>
 
@@ -412,6 +412,18 @@
     </section>
 
   </main>
+
+
+  <!-- ==================== VAULT VIEWER MODAL ==================== -->
+  <div id="vaultViewerModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto no-scrollbar">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 id="vaultViewerTitle" class="text-sm font-bold text-white">Private Vault Content</h3>
+        <button onclick="closeVaultViewerModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+      </div>
+      <div id="vaultViewerGrid" class="grid grid-cols-2 gap-2"></div>
+    </div>
+  </div>
 
 
   <!-- ==================== NEW DIRECT CHAT MODAL ==================== -->
@@ -681,7 +693,14 @@
         if (doc.exists) {
           const u = doc.data();
           const img = u.photoUrl ? `<img src="${u.photoUrl}" class="w-full h-40 object-cover rounded-xl border border-slate-800">` : `<div class="h-28 bg-slate-950 rounded-xl flex items-center justify-center border border-slate-800 text-3xl">📸</div>`;
-          
+          const vaultCount = (u.vaultPhotos || []).length;
+          const hasAccess = await checkVaultAccessPermission(uid);
+
+          let vaultAccessBtn = "";
+          if (hasAccess && vaultCount > 0) {
+            vaultAccessBtn = `<button onclick="viewUserVaultPhotos('${uid}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl transition shadow text-xs">🔓 View Unlocked Vault (${vaultCount} Photos)</button>`;
+          }
+
           body.innerHTML = `
             ${img}
             <div class="flex justify-between items-center pt-1">
@@ -692,8 +711,9 @@
             <div class="grid grid-cols-2 gap-2 text-[10px] bg-slate-950 p-2.5 rounded-xl border border-slate-800">
               <div><span class="text-slate-500">Orientation:</span> <span class="text-slate-200 font-semibold">${u.orientation || 'N/A'}</span></div>
               <div><span class="text-slate-500">Experience:</span> <span class="text-slate-200 font-semibold">${u.experience || 'N/A'}</span></div>
-              <div class="col-span-2"><span class="text-slate-500">Affiliation:</span> <span class="text-slate-200 font-semibold">${u.affiliation || 'N/A'}</span></div>
+              <div class="col-span-2"><span class="text-slate-500 font-bold text-rose-400">🔒 Vault Pictures:</span> <span class="text-white font-bold">${vaultCount} Photos</span></div>
             </div>
+            ${vaultAccessBtn}
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
               <span class="text-[9px] text-slate-500 uppercase font-bold">Bio</span>
               <p class="text-slate-300 italic">${u.bio || 'No introduction provided.'}</p>
@@ -938,10 +958,17 @@
         `<img src="${profile.photoUrl}" class="w-full h-full object-cover">` : 
         `<span class="text-4xl">📸</span>`;
 
+      const vaultCount = (profile.vaultPhotos || []).length;
+
       container.innerHTML = `
         <div class="relative h-72 bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-inner">
           ${imageContent}
-          <div class="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] text-emerald-400 font-bold border border-emerald-500/20 shadow">Verified Profile</div>
+          <div class="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] text-emerald-400 font-bold border border-emerald-500/20 shadow flex items-center space-x-1">
+            <span>Verified Profile</span>
+          </div>
+          <div class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] text-rose-300 font-bold border border-rose-500/20 shadow flex items-center space-x-1">
+            <span>🔒 Vault: ${vaultCount} Photos</span>
+          </div>
         </div>
         <div class="space-y-2 pt-3 flex-1 flex flex-col justify-between">
           <div>
@@ -973,6 +1000,7 @@
           senderId: auth.currentUser.uid,
           receiverId: target.uid,
           text: matchNoticeText,
+          type: "text",
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -980,6 +1008,7 @@
           senderId: target.uid,
           receiverId: auth.currentUser.uid,
           text: matchNoticeText,
+          type: "text",
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -1184,6 +1213,7 @@
         senderId: auth.currentUser.uid,
         receiverId: applicantUid,
         text: `🎟️ Your RSVP Application has been APPROVED! Exact Venue Location: ${exactLocation} | Event Password: ${eventPassword}`,
+        type: "text",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
 
@@ -1377,7 +1407,6 @@
       if (!confirm("Are you sure you want to delete this conversation?")) return;
       try {
         if (type === 'direct') {
-          // Delete all messages between current user and partner
           const snap1 = await db.collection("messages").where("senderId", "==", auth.currentUser.uid).where("receiverId", "==", id).get();
           const snap2 = await db.collection("messages").where("senderId", "==", id).where("receiverId", "==", auth.currentUser.uid).get();
           
@@ -1391,7 +1420,6 @@
             document.getElementById('activeChatBox').classList.add('hidden');
           }
         } else if (type === 'group') {
-          // Leave group or delete group messages
           const snap = await db.collection("group_messages").where("groupId", "==", id).get();
           const batch = db.batch();
           snap.forEach(doc => batch.delete(doc.ref));
@@ -1418,6 +1446,13 @@
       document.getElementById('chatPartnerName').innerText = partnerName;
       document.getElementById('leaveGroupBtn').classList.add('hidden');
       document.getElementById('addMembersBtn').classList.add('hidden');
+
+      if (partnerUid === 'system') {
+        document.getElementById('requestVaultBtn').classList.add('hidden');
+      } else {
+        document.getElementById('requestVaultBtn').classList.remove('hidden');
+      }
+
       loadChatMessages();
     }
 
@@ -1428,6 +1463,7 @@
       document.getElementById('chatPartnerName').innerText = groupTitle + " (Group)";
       document.getElementById('leaveGroupBtn').classList.remove('hidden');
       document.getElementById('addMembersBtn').classList.remove('hidden');
+      document.getElementById('requestVaultBtn').classList.add('hidden');
       loadGroupMessages();
     }
 
@@ -1484,14 +1520,44 @@
 
         msgs.forEach(msg => {
           const isMe = msg.senderId === auth.currentUser.uid;
-          container.insertAdjacentHTML('beforeend', `
-            <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-              <div class="max-w-[75%] p-2.5 rounded-xl ${isMe ? 'bg-rose-600 text-white shadow' : 'bg-slate-950 text-slate-200 border border-slate-800 shadow-inner'}">
-                <p>${msg.text}</p>
-                ${isMe ? `<button onclick="deleteMessage('messages', '${msg.id}')" class="text-[8px] text-rose-200 hover:text-white underline block mt-1">Delete</button>` : ''}
+
+          if (msg.type === "vault_request") {
+            let actionMarkup = "";
+            if (!isMe) {
+              actionMarkup = `
+                <div class="mt-2.5 pt-2 border-t border-slate-700/60 space-y-1.5">
+                  <p class="text-[10px] font-bold text-amber-300">Choose Grant Access Option:</p>
+                  <div class="flex space-x-1.5">
+                    <button onclick="respondVaultRequest('${msg.id}', '${msg.senderId}', '1time')" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[9px] py-1.5 rounded-lg shadow uppercase">1-Time View ⏱️</button>
+                    <button onclick="respondVaultRequest('${msg.id}', '${msg.senderId}', 'permanent')" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-[9px] py-1.5 rounded-lg shadow uppercase">Permanent 🔓</button>
+                    <button onclick="respondVaultRequest('${msg.id}', '${msg.senderId}', 'decline')" class="bg-rose-700 hover:bg-rose-800 text-white font-bold text-[9px] px-2 py-1.5 rounded-lg shadow">Decline ✕</button>
+                  </div>
+                </div>
+              `;
+            }
+
+            container.insertAdjacentHTML('beforeend', `
+              <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[85%] p-3 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-amber-500/40 text-slate-100 shadow-xl space-y-1">
+                  <p class="text-[10px] font-bold text-amber-400 flex items-center space-x-1">
+                    <span>🔒 Vault Access Request</span>
+                  </p>
+                  <p class="text-xs">${msg.text}</p>
+                  ${actionMarkup}
+                  ${isMe ? `<button onclick="deleteMessage('messages', '${msg.id}')" class="text-[8px] text-rose-300 hover:text-white underline block mt-1">Delete Request</button>` : ''}
+                </div>
               </div>
-            </div>
-          `);
+            `);
+          } else {
+            container.insertAdjacentHTML('beforeend', `
+              <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[75%] p-2.5 rounded-xl ${isMe ? 'bg-rose-600 text-white shadow' : 'bg-slate-950 text-slate-200 border border-slate-800 shadow-inner'}">
+                  <p>${msg.text}</p>
+                  ${isMe ? `<button onclick="deleteMessage('messages', '${msg.id}')" class="text-[8px] text-rose-200 hover:text-white underline block mt-1">Delete</button>` : ''}
+                </div>
+              </div>
+            `);
+          }
         });
         container.scrollTop = container.scrollHeight;
       } catch (err) { console.error(err); }
@@ -1534,6 +1600,7 @@
           senderId: auth.currentUser.uid,
           receiverId: activeChatUserUid,
           text: text,
+          type: "text",
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         document.getElementById('chatInput').value = "";
@@ -1541,6 +1608,7 @@
       }
     }
 
+    // --- VAULT ACCESS REQUEST & PERMISSION GRANTER ---
     async function requestVaultAccessModal() {
       if (!activeChatUserUid || activeChatUserUid === 'system') {
         alert("Please select a direct conversation to request vault access.");
@@ -1550,14 +1618,125 @@
         await db.collection("messages").add({
           senderId: auth.currentUser.uid,
           receiverId: activeChatUserUid,
-          text: `🔒 [Vault Access Request]: ${currentUserData.handle} has requested access to view your private image vault.`,
+          text: `${currentUserData.handle} has requested access to view your private image vault.`,
+          type: "vault_request",
+          status: "pending",
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert("Vault Access Request sent successfully to your chat partner!");
+        alert("Vault Access Request sent successfully!");
         loadChatMessages();
       } catch (err) {
         alert("Error sending vault request: " + err.message);
       }
+    }
+
+    async function respondVaultRequest(msgDocId, requesterUid, choice) {
+      try {
+        if (choice === 'decline') {
+          await db.collection("messages").add({
+            senderId: auth.currentUser.uid,
+            receiverId: requesterUid,
+            text: `🔒 Vault Access Request was declined by ${currentUserData.handle}.`,
+            type: "text",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          await db.collection("messages").doc(msgDocId).delete();
+          alert("Vault access request declined.");
+        } else {
+          await db.collection("vault_permissions").add({
+            ownerUid: auth.currentUser.uid,
+            viewerUid: requesterUid,
+            accessType: choice, // '1time' or 'permanent'
+            used: false,
+            grantedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          const accessLabel = choice === '1time' ? '1-Time View' : 'Permanent Access';
+          await db.collection("messages").add({
+            senderId: auth.currentUser.uid,
+            receiverId: requesterUid,
+            text: `🔓 Vault Access Granted (${accessLabel})! You can now view ${currentUserData.handle}'s vault from their profile.`,
+            type: "text",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          await db.collection("messages").doc(msgDocId).delete();
+          alert(`Vault Access (${accessLabel}) granted successfully!`);
+        }
+        loadChatMessages();
+      } catch (err) {
+        alert("Error responding to request: " + err.message);
+      }
+    }
+
+    async function checkVaultAccessPermission(targetUid) {
+      if (targetUid === auth.currentUser.uid) return true;
+      try {
+        const snap = await db.collection("vault_permissions")
+          .where("ownerUid", "==", targetUid)
+          .where("viewerUid", "==", auth.currentUser.uid)
+          .get();
+
+        if (snap.empty) return false;
+
+        let hasValidPermission = false;
+        snap.forEach(doc => {
+          const perm = doc.data();
+          if (perm.accessType === "permanent") {
+            hasValidPermission = true;
+          } else if (perm.accessType === "1time" && !perm.used) {
+            hasValidPermission = true;
+          }
+        });
+        return hasValidPermission;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function viewUserVaultPhotos(targetUid) {
+      try {
+        const userDoc = await db.collection("users").doc(targetUid).get();
+        if (!userDoc.exists) return;
+
+        const u = userDoc.data();
+        const photos = u.vaultPhotos || [];
+
+        const permSnap = await db.collection("vault_permissions")
+          .where("ownerUid", "==", targetUid)
+          .where("viewerUid", "==", auth.currentUser.uid)
+          .get();
+
+        let oneTimeDocId = null;
+        permSnap.forEach(pDoc => {
+          const p = pDoc.data();
+          if (p.accessType === "1time" && !p.used) {
+            oneTimeDocId = pDoc.id;
+          }
+        });
+
+        if (oneTimeDocId) {
+          await db.collection("vault_permissions").doc(oneTimeDocId).update({ used: true });
+        }
+
+        const modal = document.getElementById('vaultViewerModal');
+        const grid = document.getElementById('vaultViewerGrid');
+        document.getElementById('vaultViewerTitle').innerText = `${u.handle}'s Vault (${photos.length} Photos)`;
+
+        grid.innerHTML = photos.map(url => `
+          <div class="h-36 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow">
+            <img src="${url}" class="w-full h-full object-cover">
+          </div>
+        `).join('');
+
+        modal.classList.remove('hidden');
+      } catch (err) {
+        alert("Error opening vault: " + err.message);
+      }
+    }
+
+    function closeVaultViewerModal() {
+      document.getElementById('vaultViewerModal').classList.add('hidden');
     }
 
     // --- VAULT TAB LOGIC & COMPRESSED VAULT UPLOADS ---
@@ -1734,6 +1913,8 @@
         `<img src="${currentUserData.photoUrl}" class="w-20 h-20 rounded-2xl object-cover border border-slate-700 shadow-lg">` : 
         `<div class="w-20 h-20 rounded-2xl bg-slate-950 flex items-center justify-center text-3xl border border-slate-800 shadow-inner">📸</div>`;
 
+      const vaultCount = (currentUserData.vaultPhotos || []).length;
+
       container.innerHTML = `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 text-left shadow-2xl">
           <div class="flex justify-between items-start border-b border-slate-800 pb-4">
@@ -1754,7 +1935,7 @@
           <div class="grid grid-cols-2 gap-2 text-[10px] bg-slate-950 p-2.5 rounded-xl border border-slate-800 shadow-inner">
             <div><span class="text-slate-500">Orientation:</span> <span class="text-slate-200 font-semibold">${currentUserData.orientation || 'N/A'}</span></div>
             <div><span class="text-slate-500">Experience:</span> <span class="text-slate-200 font-semibold">${currentUserData.experience || 'N/A'}</span></div>
-            <div class="col-span-2"><span class="text-slate-500">Affiliation:</span> <span class="text-slate-200 font-semibold">${currentUserData.affiliation || 'N/A'}</span></div>
+            <div class="col-span-2"><span class="text-slate-500 font-bold text-rose-400">🔒 Private Vault Content:</span> <span class="text-white font-bold">${vaultCount} Photos</span></div>
           </div>
 
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1 shadow-inner">
