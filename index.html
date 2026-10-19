@@ -327,6 +327,7 @@
           <div id="chatHeader" class="border-b border-slate-800 pb-3 flex justify-between items-center text-xs">
             <span id="chatPartnerName" class="font-bold text-white">Select a conversation or group</span>
             <div class="flex space-x-1">
+              <button id="viewMembersBtn" onclick="openViewMembersModal()" class="hidden bg-slate-800 text-slate-200 border border-slate-700 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:bg-slate-700 transition">👥 Members</button>
               <button id="leaveGroupBtn" onclick="leaveGroupChat()" class="hidden bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg text-[10px] font-bold">Leave Group ✕</button>
               <button id="addMembersBtn" onclick="openAddMemberModal()" class="hidden bg-slate-800 text-slate-200 border border-slate-700 px-2 py-1 rounded-lg text-[10px] font-bold">+ Member</button>
               <button id="requestVaultBtn" onclick="requestVaultAccessModal()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:bg-rose-600/30 transition">Request Vault Access</button>
@@ -422,6 +423,18 @@
         <button onclick="closeVaultViewerModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
       </div>
       <div id="vaultViewerGrid" class="grid grid-cols-2 gap-2"></div>
+    </div>
+  </div>
+
+
+  <!-- ==================== GROUP MEMBERS MODAL ==================== -->
+  <div id="viewMembersModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 id="groupMembersTitle" class="text-sm font-bold text-white">Group Chat Members</h3>
+        <button onclick="closeViewMembersModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+      </div>
+      <div id="groupMembersList" class="space-y-2 text-xs max-h-[60vh] overflow-y-auto no-scrollbar"></div>
     </div>
   </div>
 
@@ -1337,6 +1350,45 @@
       }
     }
 
+    async function openViewMembersModal() {
+      if (!activeGroupId) return;
+      const modal = document.getElementById('viewMembersModal');
+      const list = document.getElementById('groupMembersList');
+      const title = document.getElementById('groupMembersTitle');
+      list.innerHTML = `<div class="text-center py-4 text-slate-500">Loading members...</div>`;
+      modal.classList.remove('hidden');
+
+      try {
+        const doc = await db.collection("groups").doc(activeGroupId).get();
+        if (doc.exists) {
+          const gData = doc.data();
+          title.innerText = `${gData.title} Members (${(gData.members || []).length})`;
+          
+          let membersMarkup = "";
+          for (let handle of (gData.members || [])) {
+            // Find user doc by handle if available
+            const userSnap = await db.collection("users").where("handle", "==", handle).get();
+            let userUid = null;
+            userSnap.forEach(u => userUid = u.id);
+
+            membersMarkup += `
+              <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center shadow-inner">
+                <span class="font-bold text-white">${handle} ${handle === currentUserData.handle ? '<span class="text-rose-400 text-[9px] font-normal">(You)</span>' : ''}</span>
+                ${userUid ? `<button onclick="openUserPublicProfileModal('${userUid}')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold px-2 py-1 rounded-lg">Profile 👤</button>` : '<span class="text-[9px] text-slate-500">Member</span>'}
+              </div>
+            `;
+          }
+          list.innerHTML = membersMarkup;
+        }
+      } catch (err) {
+        list.innerHTML = `<div class="text-center py-4 text-red-400">Error loading group members.</div>`;
+      }
+    }
+
+    function closeViewMembersModal() {
+      document.getElementById('viewMembersModal').classList.add('hidden');
+    }
+
     async function loadInbox() {
       const list = document.getElementById('inboxConversations');
       list.innerHTML = "";
@@ -1446,6 +1498,7 @@
       document.getElementById('chatPartnerName').innerText = partnerName;
       document.getElementById('leaveGroupBtn').classList.add('hidden');
       document.getElementById('addMembersBtn').classList.add('hidden');
+      document.getElementById('viewMembersBtn').classList.add('hidden');
 
       if (partnerUid === 'system') {
         document.getElementById('requestVaultBtn').classList.add('hidden');
@@ -1463,6 +1516,7 @@
       document.getElementById('chatPartnerName').innerText = groupTitle + " (Group)";
       document.getElementById('leaveGroupBtn').classList.remove('hidden');
       document.getElementById('addMembersBtn').classList.remove('hidden');
+      document.getElementById('viewMembersBtn').classList.remove('hidden');
       document.getElementById('requestVaultBtn').classList.add('hidden');
       loadGroupMessages();
     }
@@ -1643,13 +1697,29 @@
           await db.collection("messages").doc(msgDocId).delete();
           alert("Vault access request declined.");
         } else {
-          await db.collection("vault_permissions").add({
-            ownerUid: auth.currentUser.uid,
-            viewerUid: requesterUid,
-            accessType: choice, // '1time' or 'permanent'
-            used: false,
-            grantedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
+          // Check if permission doc already exists for owner and viewer
+          const existingPermSnap = await db.collection("vault_permissions")
+            .where("ownerUid", "==", auth.currentUser.uid)
+            .where("viewerUid", "==", requesterUid)
+            .get();
+
+          if (!existingPermSnap.empty) {
+            existingPermSnap.forEach(async doc => {
+              await db.collection("vault_permissions").doc(doc.id).update({
+                accessType: choice,
+                used: false,
+                grantedAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            });
+          } else {
+            await db.collection("vault_permissions").add({
+              ownerUid: auth.currentUser.uid,
+              viewerUid: requesterUid,
+              accessType: choice, // '1time' or 'permanent'
+              used: false,
+              grantedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
 
           const accessLabel = choice === '1time' ? '1-Time View' : 'Permanent Access';
           await db.collection("messages").add({
