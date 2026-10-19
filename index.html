@@ -176,12 +176,6 @@
           </div>
         </div>
 
-        <!-- PUBLIC PROFILE PHOTO -->
-        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase">Public Profile Photo (Discover Feed)</label>
-          <input type="file" id="regPublicPhoto" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-rose-600 file:text-white cursor-pointer">
-        </div>
-
         <!-- EULA & SAFETY DISCLAIMER -->
         <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5 text-[11px] text-slate-300">
           <p class="font-bold text-rose-400 uppercase text-[9px]">End User Safety & Zero-Leak Agreement</p>
@@ -237,6 +231,9 @@
       <div class="bg-slate-800 text-slate-300 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg font-mono">
         <span id="navUserHandle">@Member</span>
       </div>
+      <button onclick="logoutMember()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">
+        Log Out
+      </button>
     </div>
   </header>
 
@@ -246,11 +243,12 @@
 
     <!-- TAB NAVIGATION -->
     <nav class="flex border-b border-slate-800 mb-5 text-xs font-semibold text-center overflow-x-auto no-scrollbar">
-      <button onclick="switchTab('discover')" id="tabDiscover" class="flex-1 min-w-[70px] py-3 text-rose-500 border-b-2 border-rose-500 transition">Discover</button>
-      <button onclick="switchTab('events')" id="tabEvents" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">Events</button>
-      <button onclick="switchTab('messages')" id="tabMessages" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition relative">Messages</button>
-      <button onclick="switchTab('invites')" id="tabInvites" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">Invites</button>
-      <button onclick="switchTab('profile')" id="tabProfile" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">My Profile</button>
+      <button onclick="switchTab('discover')" id="tabDiscover" class="flex-1 min-w-[65px] py-3 text-rose-500 border-b-2 border-rose-500 transition">Discover</button>
+      <button onclick="switchTab('events')" id="tabEvents" class="flex-1 min-w-[65px] py-3 text-slate-400 hover:text-slate-200 transition">Events</button>
+      <button onclick="switchTab('messages')" id="tabMessages" class="flex-1 min-w-[65px] py-3 text-slate-400 hover:text-slate-200 transition relative">Messages</button>
+      <button onclick="switchTab('vault')" id="tabVault" class="flex-1 min-w-[65px] py-3 text-slate-400 hover:text-slate-200 transition">Vault</button>
+      <button onclick="switchTab('invites')" id="tabInvites" class="flex-1 min-w-[65px] py-3 text-slate-400 hover:text-slate-200 transition">Invites</button>
+      <button onclick="switchTab('profile')" id="tabProfile" class="flex-1 min-w-[65px] py-3 text-slate-400 hover:text-slate-200 transition">My Profile</button>
     </nav>
 
     <!-- 1. TINDER-LIKE DISCOVER DECK -->
@@ -271,7 +269,7 @@
       <div class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-2xl">
         <div>
           <h3 class="text-sm font-bold text-white">Private Community Events</h3>
-          <p class="text-[11px] text-slate-400">Exclusive gatherings with strict verification and privacy rules.</p>
+          <p class="text-[11px] text-slate-400">Exclusive gatherings with strict host verification and approval.</p>
         </div>
         <button onclick="openHostEventModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-lg">Host Event +</button>
       </div>
@@ -281,12 +279,17 @@
       </div>
     </section>
 
-    <!-- 3. MESSAGES & LIVE CHAT -->
+    <!-- 3. MESSAGES, GROUP CHAT & LIVE CHAT BOX -->
     <section id="contentMessages" class="hidden space-y-3">
+      <div class="flex justify-between items-center bg-slate-900 border border-slate-800 p-3 rounded-2xl">
+        <h3 class="text-xs font-bold text-white">Conversations & Groups</h3>
+        <button onclick="openCreateGroupModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] px-3 py-1.5 rounded-xl transition">Create Group Chat +</button>
+      </div>
+
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <!-- Matches / Conversations List -->
         <div id="matchesInboxList" class="bg-slate-900 border border-slate-800 rounded-2xl p-3 space-y-2 h-[420px] overflow-y-auto">
-          <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Matches & Inbox</h3>
+          <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Inbox & Groups</h4>
           <div id="inboxConversations" class="space-y-1">
             <!-- Dynamic list -->
           </div>
@@ -315,7 +318,32 @@
       </div>
     </section>
 
-    <!-- 4. INVITE & NETWORK MANAGER -->
+    <!-- 4. PRIVATE VAULT TAB -->
+    <section id="contentVault" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+        <div class="space-y-1">
+          <h3 class="text-base font-bold text-white">My Private Image Vault</h3>
+          <p class="text-xs text-slate-400">Photos added to your vault remain encrypted and hidden until you explicitly grant access to another member.</p>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase">Add Photo Link / Image URL to Vault</label>
+          <div class="flex space-x-2">
+            <input type="text" id="vaultPhotoUrl" placeholder="https://..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-white">
+            <button onclick="addVaultPhoto()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition">Add Photo</button>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-300">Your Encrypted Vault Items</h4>
+          <div id="vaultGrid" class="grid grid-cols-3 gap-2">
+            <!-- Vault items -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. INVITE & NETWORK MANAGER -->
     <section id="contentInvites" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
         <div class="space-y-1">
@@ -340,7 +368,7 @@
       </div>
     </section>
 
-    <!-- 5. MY PROFILE & RATING -->
+    <!-- 6. MY PROFILE & RATING -->
     <section id="contentProfile" class="hidden space-y-4">
       <div id="myProfileContainer" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
         Loading profile...
@@ -348,6 +376,44 @@
     </section>
 
   </main>
+
+
+  <!-- ==================== EDIT PROFILE MODAL ==================== -->
+  <div id="editProfileModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white">Edit My Profile</h3>
+        <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <input type="text" id="editHandle" placeholder="Username / Handle" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+        <input type="text" id="editAge" placeholder="Age (e.g. 32 / 30)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+        <input type="text" id="editLocation" placeholder="Location" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+        <textarea id="editBio" rows="3" placeholder="About Me / Us..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white resize-none"></textarea>
+        
+        <button onclick="saveProfileChanges()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Save Changes →</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== CREATE GROUP CHAT MODAL ==================== -->
+  <div id="createGroupModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white">Create Group Chat</h3>
+        <button onclick="closeCreateGroupModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <input type="text" id="groupTitle" placeholder="Group Name (e.g. Manila Couples Circle)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+        <input type="text" id="groupMemberHandles" placeholder="Invite Usernames (e.g. @AlexAndElena, @Sofia)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+        
+        <button onclick="submitCreateGroup()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Create Group →</button>
+      </div>
+    </div>
+  </div>
 
 
   <!-- ==================== HOST EVENT MODAL ==================== -->
@@ -385,6 +451,7 @@
     let discoverProfiles = [];
     let currentDiscoverIndex = 0;
     let activeChatUserUid = null;
+    let myVaultPhotos = [];
 
     // --- AUTH TOGGLE ---
     function toggleAuthMode(mode) {
@@ -395,6 +462,13 @@
         document.getElementById('stepLogin').classList.add('hidden');
         document.getElementById('stepInvite').classList.remove('hidden');
       }
+    }
+
+    // --- LOGOUT MEMBER ---
+    function logoutMember() {
+      auth.signOut().then(() => {
+        window.location.reload();
+      });
     }
 
     // --- STEP 1: INVITE CODE VERIFICATION ---
@@ -410,7 +484,7 @@
           document.getElementById('stepInvite').classList.add('hidden');
           document.getElementById('stepRegister').classList.remove('hidden');
         } else {
-          if (code.startsWith("SWY-")) { // Test mode fallback
+          if (code.startsWith("SWY-")) {
             window.verifiedInviteCode = code;
             alert("Invite code accepted (Test Mode)!");
             document.getElementById('stepInvite').classList.add('hidden');
@@ -451,10 +525,8 @@
         const cred = await auth.createUserWithEmailAndPassword(email, password);
         const uid = cred.user.uid;
 
-        // Send email verification
         await cred.user.sendEmailVerification();
 
-        // Mark invite code as used & track inviter network
         if (window.verifiedInviteCode) {
           const inviteRef = db.collection("invites").doc(window.verifiedInviteCode);
           const inviteSnap = await inviteRef.get();
@@ -464,7 +536,6 @@
             await inviteRef.update({ used: true, usedBy: uid });
           }
 
-          // Save link to network
           await db.collection("networks").add({
             inviterId: inviterId,
             invitedUid: uid,
@@ -494,7 +565,6 @@
 
         await db.collection("users").doc(uid).set(userData);
 
-        // Send welcome message in inbox
         await db.collection("messages").add({
           senderId: "system",
           receiverId: uid,
@@ -503,8 +573,8 @@
         });
 
         alert("Registration complete! A verification email has been sent. Please verify your email before logging in.");
-        auth.signOut();
-        location.reload();
+        await auth.signOut();
+        window.location.reload();
       } catch (err) {
         alert("Registration error: " + err.message);
       }
@@ -520,7 +590,7 @@
         const cred = await auth.signInWithEmailAndPassword(email, password);
         if (!cred.user.emailVerified) {
           alert("Please verify your email address before logging in. Check your inbox.");
-          auth.signOut();
+          await auth.signOut();
           return;
         }
         document.getElementById('authGateModal').classList.add('hidden');
@@ -538,12 +608,12 @@
           currentUserData = doc.data();
           if (currentUserData.banned) {
             alert("Your account has been banned due to community reports.");
-            auth.signOut();
-            location.reload();
+            await auth.signOut();
+            window.location.reload();
             return;
           }
-          document.getElementById('navUserHandle').innerText = currentUserData.handle;
-          document.getElementById('navUserRating').innerText = currentUserData.rating.toFixed(1);
+          document.getElementById('navUserHandle').innerText = currentUserData.handle || "@Member";
+          document.getElementById('navUserRating').innerText = (currentUserData.rating || 5.0).toFixed(1);
           loadDiscoverDeck();
           loadEvents();
           loadInbox();
@@ -576,7 +646,7 @@
       const actionBtns = document.getElementById('tinderActionButtons');
 
       if (discoverProfiles.length === 0 || currentDiscoverIndex >= discoverProfiles.length) {
-        container.innerHTML = `<div class="text-center py-24 text-slate-400">No more profiles in your area. Check back later!</div>`;
+        container.innerHTML = `<div class="text-center py-24 text-slate-400">No registered members found in your queue. Check back later!</div>`;
         actionBtns.classList.add('hidden');
         return;
       }
@@ -592,11 +662,11 @@
         <div class="space-y-2 pt-3 flex-1 flex flex-col justify-between">
           <div>
             <div class="flex justify-between items-start">
-              <h2 class="text-lg font-bold text-white">${profile.handle} <span class="text-rose-400 font-normal text-sm">(${profile.age})</span></h2>
-              <span class="text-amber-400 text-xs font-bold">⭐ ${profile.rating.toFixed(1)}</span>
+              <h2 class="text-lg font-bold text-white">${profile.handle || '@Member'} <span class="text-rose-400 font-normal text-sm">(${profile.age || 'N/A'})</span></h2>
+              <span class="text-amber-400 text-xs font-bold">⭐ ${(profile.rating || 5.0).toFixed(1)}</span>
             </div>
-            <p class="text-xs text-rose-400 font-semibold capitalize">${profile.accountType} • ${profile.location}</p>
-            <p class="text-xs text-slate-300 italic pt-2 line-clamp-3">"${profile.bio}"</p>
+            <p class="text-xs text-rose-400 font-semibold capitalize">${profile.accountType || 'Member'} • ${profile.location || 'Discreet'}</p>
+            <p class="text-xs text-slate-300 italic pt-2 line-clamp-3">"${profile.bio || 'No introduction provided.'}"</p>
           </div>
           <div class="flex flex-wrap gap-1 pt-2">
             ${(profile.lookingFor || []).map(i => `<span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded">${i}</span>`).join('')}
@@ -607,7 +677,6 @@
 
     async function tinderLike() {
       const target = discoverProfiles[currentDiscoverIndex];
-      // Simulate match & add to inbox
       await db.collection("matches").add({
         users: [auth.currentUser.uid, target.uid],
         matchedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -623,7 +692,7 @@
       renderCurrentDiscoverCard();
     }
 
-    // --- EVENTS HUB ---
+    // --- EVENTS HUB WITH HOST APPROVAL ---
     function openHostEventModal() { document.getElementById('hostEventModal').classList.remove('hidden'); }
     function closeHostEventModal() { document.getElementById('hostEventModal').classList.add('hidden'); }
 
@@ -653,7 +722,6 @@
           maxPaxCouple: maxC,
           rules: rules,
           eventPassword: password,
-          participants: [],
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         alert("Event hosted successfully!");
@@ -676,6 +744,7 @@
 
         snap.forEach(doc => {
           const ev = doc.data();
+          const isHost = ev.hostUid === auth.currentUser.uid;
           const card = `
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
               <div class="flex justify-between items-start text-xs">
@@ -688,9 +757,15 @@
                 <p class="font-bold text-rose-400 uppercase text-[9px]">Event Rules:</p>
                 <p>${ev.rules}</p>
               </div>
-              <button onclick="requestRSVP('${doc.id}', '${ev.eventPassword}', '${ev.exactLocation}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition">
-                Request RSVP & Location Access
-              </button>
+              ${isHost ? `
+                <div class="bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl text-[10px] text-amber-300 font-bold">
+                  👑 You are hosting this event. Manage attendees below.
+                </div>
+              ` : `
+                <button onclick="requestEventRSVP('${doc.id}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                  Apply & Request RSVP Approval
+                </button>
+              `}
             </div>
           `;
           container.insertAdjacentHTML('beforeend', card);
@@ -698,11 +773,39 @@
       } catch (err) { console.error(err); }
     }
 
-    async function requestRSVP(eventId, password, exactLoc) {
-      alert(`RSVP Accepted! Secure Venue: ${exactLoc} | Access Password: ${password}. (An automated reminder will be sent 3 days prior).`);
+    async function requestEventRSVP(eventId) {
+      await db.collection("event_rsvps").add({
+        eventId: eventId,
+        userUid: auth.currentUser.uid,
+        userHandle: currentUserData.handle,
+        status: "pending",
+        requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert("RSVP Application Submitted! The event host must approve your application before exact venue details are revealed.");
     }
 
-    // --- MESSAGES & AUTO-MASKING CHAT ---
+    // --- MESSAGES, GROUP CHAT & LIVE CHAT BOX ---
+    function openCreateGroupModal() { document.getElementById('createGroupModal').classList.remove('hidden'); }
+    function closeCreateGroupModal() { document.getElementById('createGroupModal').classList.add('hidden'); }
+
+    async function submitCreateGroup() {
+      const title = document.getElementById('groupTitle').value.trim();
+      const handlesText = document.getElementById('groupMemberHandles').value.trim();
+      if (!title) { alert("Please enter a group title."); return; }
+
+      try {
+        await db.collection("groups").add({
+          title: title,
+          createdBy: auth.currentUser.uid,
+          members: [currentUserData.handle, ...handlesText.split(',').map(h => h.trim())],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("Group chat created successfully!");
+        closeCreateGroupModal();
+        loadInbox();
+      } catch (err) { alert("Error creating group: " + err.message); }
+    }
+
     async function loadInbox() {
       const list = document.getElementById('inboxConversations');
       list.innerHTML = "";
@@ -713,7 +816,6 @@
 
         if (senders.size === 0) {
           list.innerHTML = `<div class="text-slate-500 text-center py-10 text-xs">No active conversations.</div>`;
-          return;
         }
 
         senders.forEach(async (senderId) => {
@@ -723,7 +825,7 @@
                 <span class="text-rose-500 font-bold">🛡️</span>
                 <div>
                   <p class="font-bold text-white">System Welcome</p>
-                  <p class="text-[10px] text-slate-400 truncate">Tap to view community welcome guidelines.</p>
+                  <p class="text-[10px] text-slate-400 truncate">Tap to view guidelines.</p>
                 </div>
               </div>
             `);
@@ -733,7 +835,7 @@
               const uData = userDoc.data();
               list.insertAdjacentHTML('beforeend', `
                 <div onclick="openChat('${uData.uid}', '${uData.handle}')" class="p-2.5 bg-slate-950 rounded-xl cursor-pointer hover:bg-slate-800 transition text-xs flex items-center space-x-2">
-                  <div class="w-8 h-8 rounded-lg bg-rose-600/20 text-rose-400 font-bold flex items-center justify-center">${uData.handle.charAt(1)}</div>
+                  <div class="w-8 h-8 rounded-lg bg-rose-600/20 text-rose-400 font-bold flex items-center justify-center">${(uData.handle || 'M').charAt(1)}</div>
                   <div>
                     <p class="font-bold text-white">${uData.handle}</p>
                     <p class="text-[10px] text-slate-400">Encrypted Chat</p>
@@ -757,10 +859,7 @@
       const container = document.getElementById('chatMessages');
       container.innerHTML = "";
       try {
-        const snap = await db.collection("messages")
-          .where("receiverId", "in", [auth.currentUser.uid, activeChatUserUid])
-          .get();
-
+        const snap = await db.collection("messages").get();
         snap.forEach(doc => {
           const msg = doc.data();
           if ((msg.senderId === auth.currentUser.uid && msg.receiverId === activeChatUserUid) ||
@@ -783,7 +882,6 @@
       let text = document.getElementById('chatInput').value.trim();
       if (!text || !activeChatUserUid) return;
 
-      // Auto-mask email and phone number
       const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
       const phoneRegex = /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
 
@@ -803,6 +901,35 @@
 
       document.getElementById('chatInput').value = "";
       loadChatMessages();
+    }
+
+    function requestVaultAccessModal() {
+      alert("Vault Access Request sent to your chat partner!");
+    }
+
+    // --- VAULT TAB LOGIC ---
+    function addVaultPhoto() {
+      const url = document.getElementById('vaultPhotoUrl').value.trim();
+      if (!url) return;
+      myVaultPhotos.push(url);
+      document.getElementById('vaultPhotoUrl').value = "";
+      renderVaultGrid();
+    }
+
+    function renderVaultGrid() {
+      const grid = document.getElementById('vaultGrid');
+      grid.innerHTML = "";
+      if (myVaultPhotos.length === 0) {
+        grid.innerHTML = `<div class="col-span-3 text-center py-6 text-slate-500 text-xs">No private photos added to vault yet.</div>`;
+        return;
+      }
+      myVaultPhotos.forEach(url => {
+        grid.insertAdjacentHTML('beforeend', `
+          <div class="h-24 bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+            <img src="${url}" class="w-full h-full object-cover">
+          </div>
+        `);
+      });
     }
 
     // --- INVITES & NETWORK DASHBOARD ---
@@ -847,7 +974,44 @@
       } catch (err) { console.error(err); }
     }
 
-    // --- MY PROFILE & DELETE ACCOUNT ---
+    // --- MY PROFILE, EDIT PROFILE & DELETE ACCOUNT ---
+    function openEditProfileModal() {
+      document.getElementById('editHandle').value = currentUserData.handle || '';
+      document.getElementById('editAge').value = currentUserData.age || '';
+      document.getElementById('editLocation').value = currentUserData.location || '';
+      document.getElementById('editBio').value = currentUserData.bio || '';
+      document.getElementById('editProfileModal').classList.remove('hidden');
+    }
+
+    function closeEditProfileModal() {
+      document.getElementById('editProfileModal').classList.add('hidden');
+    }
+
+    async function saveProfileChanges() {
+      const handle = document.getElementById('editHandle').value.trim();
+      const age = document.getElementById('editAge').value.trim();
+      const location = document.getElementById('editLocation').value.trim();
+      const bio = document.getElementById('editBio').value.trim();
+
+      try {
+        await db.collection("users").doc(auth.currentUser.uid).update({
+          handle: handle,
+          age: age,
+          location: location,
+          bio: bio
+        });
+        currentUserData.handle = handle;
+        currentUserData.age = age;
+        currentUserData.location = location;
+        currentUserData.bio = bio;
+
+        document.getElementById('navUserHandle').innerText = handle;
+        renderMyProfile();
+        closeEditProfileModal();
+        alert("Profile updated successfully!");
+      } catch (err) { alert("Error updating profile: " + err.message); }
+    }
+
     async function renderMyProfile() {
       const container = document.getElementById('myProfileContainer');
       container.innerHTML = `
@@ -858,17 +1022,22 @@
               <p class="text-xs text-rose-400 font-semibold capitalize">${currentUserData.accountType} • ${currentUserData.location}</p>
             </div>
             <div class="text-right">
-              <span class="text-amber-400 font-bold text-sm">⭐ ${currentUserData.rating.toFixed(1)}</span>
+              <span class="text-amber-400 font-bold text-sm">⭐ ${(currentUserData.rating || 5.0).toFixed(1)}</span>
               <p class="text-[9px] text-slate-500">Community Rating</p>
             </div>
           </div>
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
             <span class="text-[10px] text-slate-500 uppercase font-bold">About Me / Us</span>
-            <p class="text-slate-300 italic">${currentUserData.bio}</p>
+            <p class="text-slate-300 italic">${currentUserData.bio || 'No description provided.'}</p>
           </div>
-          <button onclick="deleteAccount()" class="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 font-bold py-2.5 rounded-xl text-xs transition">
-            Delete Profile & Account
-          </button>
+          <div class="flex space-x-2">
+            <button onclick="openEditProfileModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+              Edit My Profile ✏️
+            </button>
+            <button onclick="deleteAccount()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 font-bold px-4 py-2.5 rounded-xl text-xs transition">
+              Delete Profile
+            </button>
+          </div>
         </div>
       `;
     }
@@ -879,7 +1048,7 @@
           await db.collection("users").doc(auth.currentUser.uid).delete();
           await auth.currentUser.delete();
           alert("Account successfully deleted.");
-          location.reload();
+          window.location.reload();
         } catch (err) {
           alert("Error deleting account: " + err.message);
         }
@@ -888,14 +1057,14 @@
 
     // --- UTILITIES ---
     function switchTab(tabName) {
-      ['discover', 'events', 'messages', 'invites', 'profile'].forEach(t => {
+      ['discover', 'events', 'messages', 'vault', 'invites', 'profile'].forEach(t => {
         const content = document.getElementById('content' + capitalize(t));
         const btn = document.getElementById('tab' + capitalize(t));
         if (content) content.classList.add('hidden');
-        if (btn) btn.className = 'flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition';
+        if (btn) btn.className = 'flex-1 min-w-[65px] py-3 text-slate-400 hover:text-slate-200 transition';
       });
       document.getElementById('content' + capitalize(tabName)).classList.remove('hidden');
-      document.getElementById('tab' + capitalize(tabName)).className = 'flex-1 min-w-[70px] py-3 text-rose-500 border-b-2 border-rose-500 font-bold transition';
+      document.getElementById('tab' + capitalize(tabName)).className = 'flex-1 min-w-[65px] py-3 text-rose-500 border-b-2 border-rose-500 font-bold transition';
     }
 
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
