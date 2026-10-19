@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sway — Exclusive Private Social Network</title>
 
-  <meta name="theme-color" content="#020617">
+  <meta name="theme-color" content="#07080e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -35,7 +35,10 @@
       darkMode: 'class',
       theme: {
         extend: {
-          colors: { brand: { 500: '#f43f5e', 600: '#e11d48', 700: '#be123c' } }
+          colors: { 
+            brand: { 500: '#f43f5e', 600: '#e11d48', 700: '#be123c' },
+            dark: { 950: '#07080e', 900: '#0f111a', 800: '#1a1d2d' }
+          }
         }
       }
     }
@@ -45,6 +48,7 @@
     body {
       -webkit-user-select: none; user-select: none;
       -webkit-touch-callout: none;
+      background-color: #07080e;
     }
     img { pointer-events: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -54,29 +58,29 @@
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col items-center justify-start antialiased selection:bg-rose-500 selection:text-white pb-20" oncontextmenu="return false;">
 
   <!-- ==================== ONBOARDING & AUTH MODAL GATE ==================== -->
-  <div id="authGateModal" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4 overflow-y-auto">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-auto">
+  <div id="authGateModal" class="fixed inset-0 z-50 bg-slate-950/98 backdrop-blur-xl flex flex-col items-center justify-center p-4 overflow-y-auto">
+    <div class="max-w-md w-full bg-slate-900/90 border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-rose-950/20 space-y-6 my-auto">
       
       <!-- Brand Logo & Tagline -->
-      <div class="flex flex-col items-center space-y-2 text-center">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-xl shadow-rose-900/50 border border-rose-400/30">
-          <svg class="w-8 h-8 text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="flex flex-col items-center space-y-2.5 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-2xl shadow-rose-900/60 border border-rose-400/30">
+          <svg class="w-9 h-9 text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18.2 9.5a5.5 5.5 0 00-9.7-3.1c-1.1 1.3-1.3 3.1-.4 4.6 1 1.7 3.3 2.5 4.3 4.2 1 1.5.8 3.5-.6 4.8a5.5 5.5 0 01-8.2-7.1"></path>
           </svg>
         </div>
-        <h1 class="text-2xl font-black tracking-wider uppercase bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent">Sway</h1>
-        <p class="text-xs text-rose-400 font-medium">Exclusive Private Social Network</p>
+        <h1 class="text-3xl font-black tracking-widest uppercase bg-gradient-to-r from-rose-400 via-pink-400 to-rose-500 bg-clip-text text-transparent">Sway</h1>
+        <p class="text-xs text-rose-400/90 font-semibold tracking-wide uppercase">Exclusive Private Social Network</p>
       </div>
 
       <!-- STEP 1: INVITE CODE GATE -->
       <div id="stepInvite" class="space-y-4">
-        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">Step 1: Enter One-Time Invite Code</label>
+        <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-inner">
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-widest text-center">Step 1: Enter One-Time Invite Code</label>
           <input type="text" id="inviteCodeInput" placeholder="e.g. SWY-1234-X1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center font-mono tracking-widest text-sm focus:outline-none focus:border-rose-500 uppercase">
           <p class="text-[10px] text-slate-500 text-center">Membership is strictly invite-only. Codes cannot be recycled.</p>
         </div>
 
-        <button onclick="verifyInviteCode()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+        <button onclick="verifyInviteCode()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-lg shadow-rose-900/40 uppercase tracking-wider">
           Verify Invite Code & Proceed →
         </button>
 
@@ -89,13 +93,13 @@
 
       <!-- MEMBER LOGIN VIEW -->
       <div id="stepLogin" class="hidden space-y-4">
-        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">Verified Member Sign In</label>
+        <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-3 shadow-inner">
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-widest text-center">Verified Member Sign In</label>
           <input type="email" id="loginEmail" placeholder="member@proton.me" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
           <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
         </div>
 
-        <button onclick="loginMember()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+        <button onclick="loginMember()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-lg shadow-rose-900/40 uppercase tracking-wider">
           Sign In 🔓
         </button>
 
@@ -107,7 +111,7 @@
       </div>
 
       <!-- STEP 2: FULL REGISTRATION PANEL -->
-      <div id="stepRegister" class="hidden space-y-3 text-xs max-h-[70vh] overflow-y-auto pr-1">
+      <div id="stepRegister" class="hidden space-y-3 text-xs max-h-[70vh] overflow-y-auto pr-1 no-scrollbar">
         <div class="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl text-emerald-300 text-[11px] text-center font-medium">
           ✓ Invite Code Verified. Complete your confidential profile.
         </div>
@@ -197,7 +201,7 @@
           <input type="password" id="regPassword" placeholder="Secure Password" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white text-center text-xs focus:outline-none focus:border-rose-500">
         </div>
 
-        <button onclick="completeRegistration()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+        <button onclick="completeRegistration()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30 uppercase tracking-wider">
           Complete Registration & Verify Email 🔓
         </button>
       </div>
@@ -207,45 +211,45 @@
 
 
   <!-- ==================== ANTI-SNOOP SCREEN SHIELD ==================== -->
-  <div id="privacyBlurOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center space-y-3">
-    <div class="w-12 h-12 bg-rose-500/20 rounded-full flex items-center justify-center border border-rose-500/30">
-      <svg class="w-7 h-7 text-rose-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+  <div id="privacyBlurOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/98 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center space-y-3">
+    <div class="w-14 h-14 bg-rose-500/20 rounded-full flex items-center justify-center border border-rose-500/30 shadow-xl shadow-rose-950">
+      <svg class="w-8 h-8 text-rose-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
     </div>
-    <h3 class="text-lg font-bold text-white">Sway Protected Mode</h3>
-    <p class="text-xs text-slate-400 max-w-xs">Content hidden to protect member privacy.</p>
+    <h3 class="text-xl font-extrabold text-white tracking-wide">Sway Protected Mode</h3>
+    <p class="text-xs text-slate-400 max-w-xs font-medium">Content hidden to protect member privacy and discretion.</p>
   </div>
 
 
   <!-- ==================== HEADER BAR ==================== -->
-  <header class="w-full max-w-2xl bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-lg">
+  <header class="w-full max-w-2xl bg-slate-900/80 backdrop-blur-xl sticky top-0 z-40 border-b border-slate-800/80 px-4 py-3 flex items-center justify-between shadow-2xl">
     <div class="flex items-center space-x-2.5">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-lg shadow-rose-900/40 border border-rose-400/30">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-lg shadow-rose-900/40 border border-rose-400/30">
         <svg class="w-5 h-5 text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18.2 9.5a5.5 5.5 0 00-9.7-3.1c-1.1 1.3-1.3 3.1-.4 4.6 1 1.7 3.3 2.5 4.3 4.2 1 1.5.8 3.5-.6 4.8a5.5 5.5 0 01-8.2-7.1"></path>
         </svg>
       </div>
       <div>
-        <span class="font-black text-lg tracking-wider uppercase bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent block leading-none">Sway</span>
-        <span class="text-[9px] text-slate-400 font-medium tracking-tight block mt-0.5">Exclusive Private Social Network</span>
+        <span class="font-black text-lg tracking-wider uppercase bg-gradient-to-r from-rose-400 via-pink-400 to-rose-500 bg-clip-text text-transparent block leading-none">Sway</span>
+        <span class="text-[9px] text-slate-400 font-semibold tracking-wide block mt-1 uppercase">Exclusive Private Social Network</span>
       </div>
     </div>
 
     <!-- USER SEARCH BAR IN HEADER -->
     <div class="flex-1 max-w-[140px] sm:max-w-[180px] mx-2">
       <div class="relative">
-        <input type="text" id="userSearchInput" onkeyup="searchUsersByHandle(this.value)" placeholder="🔍 Search @user..." class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1 px-2.5 text-[10px] text-white focus:outline-none focus:border-rose-500">
-        <div id="searchResultsDropdown" class="hidden absolute top-full left-0 right-0 bg-slate-900 border border-slate-800 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-2xl z-50 text-xs"></div>
+        <input type="text" id="userSearchInput" onkeyup="searchUsersByHandle(this.value)" placeholder="🔍 Search @user..." class="w-full bg-slate-950 border border-slate-800 rounded-xl py-1.5 px-3 text-[10px] text-white focus:outline-none focus:border-rose-500 transition shadow-inner">
+        <div id="searchResultsDropdown" class="hidden absolute top-full left-0 right-0 bg-slate-900 border border-slate-800 rounded-xl mt-1.5 max-h-48 overflow-y-auto shadow-2xl z-50 text-xs no-scrollbar"></div>
       </div>
     </div>
 
-    <div class="flex items-center space-x-1.5">
-      <div id="navRatingBadge" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-1 rounded-lg font-bold flex items-center space-x-1">
+    <div class="flex items-center space-x-2">
+      <div id="navRatingBadge" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-1 rounded-lg font-bold flex items-center space-x-1 shadow-inner">
         <span>⭐</span> <span id="navUserRating">5.0</span>
       </div>
-      <div class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2 py-1 rounded-lg font-mono">
+      <div class="bg-slate-950 text-slate-300 border border-slate-800 text-[10px] px-2.5 py-1 rounded-lg font-mono tracking-tight shadow-inner">
         <span id="navUserHandle">@Member</span>
       </div>
-      <button onclick="logoutMember()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 text-[10px] px-2 py-1 rounded-lg font-bold transition">
+      <button onclick="logoutMember()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700/80 text-[10px] px-2.5 py-1 rounded-lg font-bold transition shadow">
         Log Out
       </button>
     </div>
@@ -256,7 +260,7 @@
   <main class="w-full max-w-2xl px-4 py-4 mb-16 flex-1">
 
     <!-- TAB NAVIGATION -->
-    <nav class="flex border-b border-slate-800 mb-5 text-xs font-semibold text-center overflow-x-auto no-scrollbar">
+    <nav class="flex border-b border-slate-800/80 mb-5 text-xs font-semibold text-center overflow-x-auto no-scrollbar">
       <button onclick="switchTab('discover')" id="tabDiscover" class="flex-1 min-w-[65px] py-3 text-rose-500 border-b-2 border-rose-500 transition">Discover</button>
       <button onclick="switchTab('events')" id="tabEvents" class="flex-1 min-w-[65px] py-3 text-slate-400 hover:text-slate-200 transition">Events</button>
       <button onclick="switchTab('messages')" id="tabMessages" class="flex-1 min-w-[65px] py-3 text-slate-400 hover:text-slate-200 transition relative">Messages</button>
@@ -274,22 +278,22 @@
       <!-- Action Buttons -->
       <div id="tinderActionButtons" class="hidden flex justify-center items-center space-x-6 pt-2">
         <button onclick="tinderPass()" class="w-14 h-14 rounded-full bg-slate-900 border border-slate-800 hover:border-rose-500/50 flex items-center justify-center text-xl shadow-xl transition transform active:scale-95">❌</button>
-        <button onclick="tinderLike()" class="w-16 h-16 rounded-full bg-gradient-to-tr from-rose-600 to-pink-600 flex items-center justify-center text-2xl shadow-xl shadow-rose-950 transition transform active:scale-95">💖</button>
+        <button onclick="tinderLike()" class="w-16 h-16 rounded-full bg-gradient-to-tr from-rose-600 to-pink-600 flex items-center justify-center text-2xl shadow-2xl shadow-rose-950 transition transform active:scale-95">💖</button>
       </div>
     </section>
 
     <!-- 2. EVENTS HUB & HOST APPROVALS -->
     <section id="contentEvents" class="hidden space-y-4">
-      <div class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+      <div class="flex justify-between items-center bg-slate-900/90 border border-slate-800/80 p-4 rounded-2xl shadow-lg">
         <div>
-          <h3 class="text-sm font-bold text-white">Private Community Events</h3>
+          <h3 class="text-sm font-bold text-white tracking-wide">Private Community Events</h3>
           <p class="text-[11px] text-slate-400">Exclusive gatherings with strict host verification and approval.</p>
         </div>
-        <button onclick="openHostEventModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-lg">Host Event +</button>
+        <button onclick="openHostEventModal()" class="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-lg shadow-rose-900/30">Host Event +</button>
       </div>
 
       <!-- Pending Applications for Events Hosted By Me -->
-      <div id="myHostedEventsApprovalSection" class="hidden space-y-2 bg-slate-900/80 border border-amber-500/30 p-4 rounded-2xl">
+      <div id="myHostedEventsApprovalSection" class="hidden space-y-2 bg-slate-900/90 border border-amber-500/30 p-4 rounded-2xl shadow-lg">
         <h4 class="text-xs font-bold text-amber-400">👑 Event Applications Needing Your Approval</h4>
         <div id="hostedApplicationsList" class="space-y-2 text-xs"></div>
       </div>
@@ -301,17 +305,17 @@
 
     <!-- 3. MESSAGES, GROUP CHAT & LIVE CHAT BOX -->
     <section id="contentMessages" class="hidden space-y-3">
-      <div class="flex justify-between items-center bg-slate-900 border border-slate-800 p-3 rounded-2xl">
-        <h3 class="text-xs font-bold text-white">Conversations & Group Chats</h3>
+      <div class="flex justify-between items-center bg-slate-900/90 border border-slate-800/80 p-3 rounded-2xl shadow-lg">
+        <h3 class="text-xs font-bold text-white tracking-wide">Conversations & Group Chats</h3>
         <div class="flex space-x-1.5">
           <button onclick="openNewDirectChatModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] px-3 py-1.5 rounded-xl border border-slate-700 transition">New Chat +</button>
-          <button onclick="openCreateGroupModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] px-3 py-1.5 rounded-xl transition">Create Group +</button>
+          <button onclick="openCreateGroupModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] px-3 py-1.5 rounded-xl transition shadow">Create Group +</button>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <!-- Conversations List -->
-        <div id="matchesInboxList" class="bg-slate-900 border border-slate-800 rounded-2xl p-3 space-y-2 h-[420px] overflow-y-auto">
+        <div id="matchesInboxList" class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-3 space-y-2 h-[420px] overflow-y-auto shadow-xl">
           <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Inbox & Active Chats</h4>
           <div id="inboxConversations" class="space-y-1">
             <!-- Dynamic list -->
@@ -319,17 +323,17 @@
         </div>
 
         <!-- Live Chat Box -->
-        <div id="activeChatBox" class="sm:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 h-[420px] flex flex-col justify-between">
+        <div id="activeChatBox" class="sm:col-span-2 bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 h-[420px] flex flex-col justify-between shadow-xl">
           <div id="chatHeader" class="border-b border-slate-800 pb-3 flex justify-between items-center text-xs">
             <span id="chatPartnerName" class="font-bold text-white">Select a conversation or group</span>
             <div class="flex space-x-1">
               <button id="leaveGroupBtn" onclick="leaveGroupChat()" class="hidden bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg text-[10px] font-bold">Leave Group ✕</button>
               <button id="addMembersBtn" onclick="openAddMemberModal()" class="hidden bg-slate-800 text-slate-200 border border-slate-700 px-2 py-1 rounded-lg text-[10px] font-bold">+ Member</button>
-              <button onclick="requestVaultAccessModal()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold">Request Vault Access</button>
+              <button onclick="requestVaultAccessModal()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:bg-rose-600/30 transition">Request Vault Access</button>
             </div>
           </div>
 
-          <div id="chatMessages" class="flex-1 overflow-y-auto py-3 space-y-2 text-xs">
+          <div id="chatMessages" class="flex-1 overflow-y-auto py-3 space-y-2 text-xs no-scrollbar">
             <div class="text-slate-500 text-center py-20">Select a conversation on the left to start chatting.</div>
           </div>
 
@@ -338,7 +342,7 @@
             <p id="chatWarning" class="text-[9px] text-amber-400 hidden">⚠️ Sharing phone numbers or email addresses in chat is strictly prohibited and will be masked.</p>
             <div class="flex space-x-2">
               <input type="text" id="chatInput" placeholder="Type a discreet message..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-rose-500">
-              <button onclick="sendChatMessage()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-xl text-xs">Send</button>
+              <button onclick="sendChatMessage()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow">Send</button>
             </div>
           </div>
         </div>
@@ -347,21 +351,21 @@
 
     <!-- 4. PRIVATE VAULT TAB -->
     <section id="contentVault" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+      <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 space-y-4 shadow-2xl">
         <div class="space-y-1">
-          <h3 class="text-base font-bold text-white">My Private Image Vault</h3>
-          <p class="text-xs text-slate-400">Upload private photos from your device or paste image links. Photos remain encrypted and hidden until you grant access.</p>
+          <h3 class="text-base font-bold text-white tracking-wide">My Private Image Vault</h3>
+          <p class="text-xs text-slate-400">Upload private photos from your device or paste image links. Photos are automatically compressed, encrypted, and hidden until you grant access.</p>
         </div>
 
-        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase">Upload Local Photo from File</label>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 shadow-inner">
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase">Upload Local Photo from File (Auto-Compressed)</label>
           <input type="file" id="vaultLocalFile" accept="image/*" onchange="uploadVaultLocalFile(this)" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-rose-600 file:text-white cursor-pointer">
           
           <div class="pt-2 border-t border-slate-800">
             <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Or Paste Image URL</label>
             <div class="flex space-x-2">
               <input type="text" id="vaultPhotoUrl" placeholder="https://..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-white">
-              <button onclick="addVaultPhotoUrl()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition">Add URL</button>
+              <button onclick="addVaultPhotoUrl()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow">Add URL</button>
             </div>
           </div>
         </div>
@@ -377,16 +381,16 @@
 
     <!-- 5. INVITE & NETWORK MANAGER -->
     <section id="contentInvites" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+      <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-6 space-y-4 shadow-2xl">
         <div class="space-y-1">
-          <h3 class="text-base font-bold text-white">Invite Quota & Network</h3>
+          <h3 class="text-base font-bold text-white tracking-wide">Invite Quota & Network</h3>
           <p class="text-xs text-slate-400">You can generate up to 10 single-use invite codes per week. Unused codes expire during weekly refresh. If an invitee gets banned (3 reports), it impacts your inviter rating.</p>
         </div>
 
-        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 text-center">
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 text-center shadow-inner">
           <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Weekly Quota Remaining</span>
           <div id="quotaDisplay" class="text-2xl font-mono font-bold text-rose-400">10 / 10</div>
-          <button onclick="generateInviteCode()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg">
+          <button onclick="generateInviteCode()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg uppercase tracking-wider">
             Generate Single-Use Code 🎫
           </button>
         </div>
@@ -402,7 +406,7 @@
 
     <!-- 6. MY PROFILE & RATING -->
     <section id="contentProfile" class="hidden space-y-4">
-      <div id="myProfileContainer" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+      <div id="myProfileContainer" class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-6 text-center text-xs text-slate-400 shadow-2xl">
         Loading profile...
       </div>
     </section>
@@ -421,7 +425,7 @@
       <div class="space-y-2 text-xs">
         <label class="block text-slate-400 font-semibold text-[10px] uppercase">Enter Recipient Handle or Username</label>
         <input type="text" id="directChatHandleInput" placeholder="e.g. @AlexAndElena" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
-        <button onclick="submitStartDirectChat()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Open Conversation →</button>
+        <button onclick="submitStartDirectChat()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition shadow">Open Conversation →</button>
       </div>
     </div>
   </div>
@@ -452,7 +456,7 @@
 
       <div class="space-y-2 text-xs">
         <input type="text" id="newMemberHandleInput" placeholder="Enter Username (e.g. @Sofia)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
-        <button onclick="submitAddGroupMember()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Add Member →</button>
+        <button onclick="submitAddGroupMember()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition shadow">Add Member →</button>
       </div>
     </div>
   </div>
@@ -460,7 +464,7 @@
 
   <!-- ==================== EDIT PROFILE MODAL ==================== -->
   <div id="editProfileModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl max-h-[85vh] overflow-y-auto">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl max-h-[85vh] overflow-y-auto no-scrollbar">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 class="text-sm font-bold text-white">Edit My Profile</h3>
         <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
@@ -532,11 +536,11 @@
         </div>
 
         <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase">Update Profile Display Photo</label>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase">Update Profile Display Photo (Auto-Compressed)</label>
           <input type="file" id="editPhotoFile" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-rose-600 file:text-white cursor-pointer">
         </div>
         
-        <button onclick="saveProfileChanges()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Save All Profile Changes →</button>
+        <button onclick="saveProfileChanges()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition shadow">Save All Profile Changes →</button>
       </div>
     </div>
   </div>
@@ -554,7 +558,7 @@
         <input type="text" id="groupTitle" placeholder="Group Name (e.g. Manila Couples Circle)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
         <input type="text" id="groupMemberHandles" placeholder="Invite Usernames (e.g. @AlexAndElena, @Sofia)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
         
-        <button onclick="submitCreateGroup()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Create Group →</button>
+        <button onclick="submitCreateGroup()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition shadow">Create Group →</button>
       </div>
     </div>
   </div>
@@ -562,7 +566,7 @@
 
   <!-- ==================== HOST EVENT MODAL ==================== -->
   <div id="hostEventModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl max-h-[85vh] overflow-y-auto">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl max-h-[85vh] overflow-y-auto no-scrollbar">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 class="text-sm font-bold text-white">Host Private Event</h3>
         <button onclick="closeHostEventModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
@@ -583,7 +587,7 @@
         <textarea id="eventRules" rows="3" placeholder="Event Rules (Attendees must accept to join)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white resize-none"></textarea>
         <input type="text" id="eventPassword" placeholder="Secret Access Password for Accepted Users" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono">
 
-        <button onclick="submitHostEvent()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Publish Event →</button>
+        <button onclick="submitHostEvent()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition shadow">Publish Event →</button>
       </div>
     </div>
   </div>
@@ -598,8 +602,8 @@
     let activeGroupId = null;
     let myVaultPhotos = [];
 
-    // Compress & Resize Image File to prevent Firestore document size limit errors (1MB max)
-    function compressImageFile(file, maxWidth = 800, quality = 0.7) {
+    // Aggressive Image Compression to stay well under 1MB Firestore document limits
+    function compressImageFile(file, maxWidth = 500, quality = 0.4) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -697,7 +701,7 @@
             <div class="flex flex-wrap gap-1">
               ${(u.lookingFor || []).map(i => `<span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded">${i}</span>`).join('')}
             </div>
-            <button onclick="startDirectChatFromProfile('${u.uid}', '${u.handle}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">
+            <button onclick="startDirectChatFromProfile('${u.uid}', '${u.handle}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition shadow">
               Send Direct Message 💬
             </button>
           `;
@@ -787,7 +791,7 @@
       let photoDataUrl = "";
       if (photoFileInput.files && photoFileInput.files[0]) {
         try {
-          photoDataUrl = await compressImageFile(photoFileInput.files[0], 600, 0.6);
+          photoDataUrl = await compressImageFile(photoFileInput.files[0], 400, 0.4);
         } catch (e) {
           console.error("Error processing photo file:", e);
         }
@@ -935,9 +939,9 @@
         `<span class="text-4xl">📸</span>`;
 
       container.innerHTML = `
-        <div class="relative h-72 bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-800">
+        <div class="relative h-72 bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-inner">
           ${imageContent}
-          <div class="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] text-emerald-400 font-bold border border-emerald-500/20">Verified Profile</div>
+          <div class="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] text-emerald-400 font-bold border border-emerald-500/20 shadow">Verified Profile</div>
         </div>
         <div class="space-y-2 pt-3 flex-1 flex flex-col justify-between">
           <div>
@@ -1040,7 +1044,7 @@
       try {
         const snap = await db.collection("events").orderBy("date", "asc").get();
         if (snap.empty) {
-          container.innerHTML = `<div class="bg-slate-900 p-6 rounded-2xl text-center text-xs text-slate-500">No upcoming private events.</div>`;
+          container.innerHTML = `<div class="bg-slate-900 p-6 rounded-2xl text-center text-xs text-slate-500 shadow">No upcoming private events.</div>`;
           return;
         }
 
@@ -1082,24 +1086,24 @@
               </button>`;
           } else {
             actionBtnHtml = `
-              <button onclick="requestEventRSVP('${doc.id}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition">
+              <button onclick="requestEventRSVP('${doc.id}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition shadow">
                 Apply & Request RSVP Approval
               </button>`;
           }
 
           const card = `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 shadow-lg">
               <div class="flex justify-between items-start text-xs">
-                <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-full font-bold">PRIVATE EVENT</span>
+                <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-0.5 rounded-full font-bold">PRIVATE EVENT</span>
                 <span class="font-mono text-slate-400">${ev.date}</span>
               </div>
               <h4 class="text-sm font-bold text-white">${ev.title}</h4>
               <p class="text-xs text-slate-400">📍 ${ev.generalLocation} • Hosted by ${ev.hostHandle}</p>
               <div class="flex space-x-3 text-[10px] text-slate-300 font-bold pt-1">
-                <span class="bg-slate-950 px-2 py-1 rounded-md border border-slate-800">📩 Applied: ${appliedCount}</span>
-                <span class="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md border border-emerald-500/20">✓ Approved: ${approvedCount}</span>
+                <span class="bg-slate-950 px-2 py-1 rounded-md border border-slate-800 shadow-inner">📩 Applied: ${appliedCount}</span>
+                <span class="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md border border-emerald-500/20 shadow-inner">✓ Approved: ${approvedCount}</span>
               </div>
-              <div class="bg-slate-950 p-2.5 rounded-xl text-[11px] text-slate-300 space-y-1">
+              <div class="bg-slate-950 p-2.5 rounded-xl text-[11px] text-slate-300 space-y-1 shadow-inner">
                 <p class="font-bold text-rose-400 uppercase text-[9px]">Event Rules:</p>
                 <p>${ev.rules}</p>
               </div>
@@ -1149,14 +1153,14 @@
             pendingCount++;
             const rsvp = rsvpDoc.data();
             list.insertAdjacentHTML('beforeend', `
-              <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+              <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center shadow-inner">
                 <div>
                   <p class="font-bold text-white cursor-pointer hover:underline" onclick="openUserPublicProfileModal('${rsvp.userUid}')">${rsvp.userHandle}</p>
                   <p class="text-[9px] text-slate-400">Applied for: ${evData.title}</p>
                 </div>
                 <div class="flex space-x-1">
-                  <button onclick="approveRSVP('${rsvpDoc.id}', '${evData.exactLocation}', '${evData.eventPassword}', '${rsvp.userUid}')" class="bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg">Approve ✓</button>
-                  <button onclick="declineRSVP('${rsvpDoc.id}')" class="bg-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg">Decline ✕</button>
+                  <button onclick="approveRSVP('${rsvpDoc.id}', '${evData.exactLocation}', '${evData.eventPassword}', '${rsvp.userUid}')" class="bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow">Approve ✓</button>
+                  <button onclick="declineRSVP('${rsvpDoc.id}')" class="bg-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow">Decline ✕</button>
                 </div>
               </div>
             `);
@@ -1230,7 +1234,7 @@
       }
     }
 
-    // --- MESSAGES, GROUP CHAT, ADD MEMBER & LEAVE GROUP ---
+    // --- MESSAGES, GROUP CHAT, ADD MEMBER, LEAVE GROUP & DELETE CONVERSATION ---
     function openCreateGroupModal() { document.getElementById('createGroupModal').classList.remove('hidden'); }
     function closeCreateGroupModal() { document.getElementById('createGroupModal').classList.add('hidden'); }
 
@@ -1320,45 +1324,91 @@
           const gData = gDoc.data();
           if (gData.members && gData.members.includes(currentUserData.handle)) {
             list.insertAdjacentHTML('beforeend', `
-              <div onclick="openGroupChat('${gDoc.id}', '${gData.title}')" class="p-2.5 bg-slate-950 rounded-xl cursor-pointer hover:bg-slate-800 transition text-xs flex items-center space-x-2">
-                <div class="w-8 h-8 rounded-lg bg-pink-600/20 text-pink-400 font-bold flex items-center justify-center">👥</div>
-                <div>
-                  <p class="font-bold text-white">${gData.title}</p>
-                  <p class="text-[10px] text-slate-400">Group Chat</p>
+              <div class="p-2.5 bg-slate-950 rounded-xl hover:bg-slate-800/80 transition text-xs flex items-center justify-between border border-slate-800/60 shadow-inner">
+                <div onclick="openGroupChat('${gDoc.id}', '${gData.title}')" class="flex-1 flex items-center space-x-2 cursor-pointer">
+                  <div class="w-8 h-8 rounded-lg bg-pink-600/20 text-pink-400 font-bold flex items-center justify-center">👥</div>
+                  <div>
+                    <p class="font-bold text-white">${gData.title}</p>
+                    <p class="text-[10px] text-slate-400">Group Chat</p>
+                  </div>
                 </div>
+                <button onclick="deleteConversation('group', '${gDoc.id}')" title="Delete Conversation" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition">✕</button>
               </div>
             `);
           }
         });
 
-        chatPartners.forEach(async (partnerId) => {
+        for (let partnerId of chatPartners) {
           if (partnerId === "system") {
             list.insertAdjacentHTML('beforeend', `
-              <div onclick="openChat('system', 'System Welcome')" class="p-2.5 bg-slate-950 rounded-xl cursor-pointer hover:bg-slate-800 transition text-xs flex items-center space-x-2">
-                <span class="text-rose-500 font-bold">🛡️</span>
-                <div>
-                  <p class="font-bold text-white">System Welcome</p>
-                  <p class="text-[10px] text-slate-400 truncate">Tap to view guidelines.</p>
+              <div class="p-2.5 bg-slate-950 rounded-xl hover:bg-slate-800/80 transition text-xs flex items-center justify-between border border-slate-800/60 shadow-inner">
+                <div onclick="openChat('system', 'System Welcome')" class="flex-1 flex items-center space-x-2 cursor-pointer">
+                  <span class="text-rose-500 font-bold">🛡️</span>
+                  <div>
+                    <p class="font-bold text-white">System Welcome</p>
+                    <p class="text-[10px] text-slate-400 truncate">Tap to view guidelines.</p>
+                  </div>
                 </div>
               </div>
             `);
-          } else if (partnerId !== auth.currentUser.uid) {
+          } else if (partnerId && partnerId !== auth.currentUser.uid) {
             const userDoc = await db.collection("users").doc(partnerId).get();
             if (userDoc.exists) {
               const uData = userDoc.data();
               list.insertAdjacentHTML('beforeend', `
-                <div onclick="openChat('${uData.uid}', '${uData.handle}')" class="p-2.5 bg-slate-950 rounded-xl cursor-pointer hover:bg-slate-800 transition text-xs flex items-center space-x-2">
-                  <div class="w-8 h-8 rounded-lg bg-rose-600/20 text-rose-400 font-bold flex items-center justify-center">${(uData.handle || 'M').charAt(0) === '@' ? (uData.handle.charAt(1) || 'M') : uData.handle.charAt(0)}</div>
-                  <div>
-                    <p class="font-bold text-white">${uData.handle}</p>
-                    <p class="text-[10px] text-slate-400">Direct Message</p>
+                <div class="p-2.5 bg-slate-950 rounded-xl hover:bg-slate-800/80 transition text-xs flex items-center justify-between border border-slate-800/60 shadow-inner">
+                  <div onclick="openChat('${uData.uid}', '${uData.handle}')" class="flex-1 flex items-center space-x-2 cursor-pointer">
+                    <div class="w-8 h-8 rounded-lg bg-rose-600/20 text-rose-400 font-bold flex items-center justify-center">${(uData.handle || 'M').charAt(0) === '@' ? (uData.handle.charAt(1) || 'M') : uData.handle.charAt(0)}</div>
+                    <div>
+                      <p class="font-bold text-white">${uData.handle}</p>
+                      <p class="text-[10px] text-slate-400">Direct Message</p>
+                    </div>
                   </div>
+                  <button onclick="deleteConversation('direct', '${uData.uid}')" title="Delete Conversation" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition">✕</button>
                 </div>
               `);
             }
           }
-        });
+        }
       } catch (err) { console.error(err); }
+    }
+
+    async function deleteConversation(type, id) {
+      if (!confirm("Are you sure you want to delete this conversation?")) return;
+      try {
+        if (type === 'direct') {
+          // Delete all messages between current user and partner
+          const snap1 = await db.collection("messages").where("senderId", "==", auth.currentUser.uid).where("receiverId", "==", id).get();
+          const snap2 = await db.collection("messages").where("senderId", "==", id).where("receiverId", "==", auth.currentUser.uid).get();
+          
+          const batch = db.batch();
+          snap1.forEach(doc => batch.delete(doc.ref));
+          snap2.forEach(doc => batch.delete(doc.ref));
+          await batch.commit();
+
+          if (activeChatUserUid === id) {
+            activeChatUserUid = null;
+            document.getElementById('activeChatBox').classList.add('hidden');
+          }
+        } else if (type === 'group') {
+          // Leave group or delete group messages
+          const snap = await db.collection("group_messages").where("groupId", "==", id).get();
+          const batch = db.batch();
+          snap.forEach(doc => batch.delete(doc.ref));
+          await batch.commit();
+
+          await db.collection("groups").doc(id).delete();
+
+          if (activeGroupId === id) {
+            activeGroupId = null;
+            document.getElementById('activeChatBox').classList.add('hidden');
+          }
+        }
+        loadInbox();
+        alert("Conversation deleted successfully.");
+      } catch (err) {
+        alert("Error deleting conversation: " + err.message);
+      }
     }
 
     function openChat(partnerUid, partnerName) {
@@ -1395,7 +1445,7 @@
           const isMe = msg.senderUid === auth.currentUser.uid;
           container.insertAdjacentHTML('beforeend', `
             <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group">
-              <div class="max-w-[75%] p-2.5 rounded-xl relative ${isMe ? 'bg-rose-600 text-white' : 'bg-slate-950 text-slate-200 border border-slate-800'}">
+              <div class="max-w-[75%] p-2.5 rounded-xl relative ${isMe ? 'bg-rose-600 text-white shadow' : 'bg-slate-950 text-slate-200 border border-slate-800 shadow-inner'}">
                 <p class="text-[9px] text-rose-300 font-bold cursor-pointer hover:underline" onclick="openUserPublicProfileModal('${msg.senderUid}')">${msg.senderHandle}</p>
                 <p>${msg.text}</p>
                 ${isMe ? `<button onclick="deleteMessage('group_messages', '${msg.id}')" class="text-[8px] text-slate-300 hover:text-white underline block mt-1">Delete</button>` : ''}
@@ -1436,7 +1486,7 @@
           const isMe = msg.senderId === auth.currentUser.uid;
           container.insertAdjacentHTML('beforeend', `
             <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-              <div class="max-w-[75%] p-2.5 rounded-xl ${isMe ? 'bg-rose-600 text-white' : 'bg-slate-950 text-slate-200 border border-slate-800'}">
+              <div class="max-w-[75%] p-2.5 rounded-xl ${isMe ? 'bg-rose-600 text-white shadow' : 'bg-slate-950 text-slate-200 border border-slate-800 shadow-inner'}">
                 <p>${msg.text}</p>
                 ${isMe ? `<button onclick="deleteMessage('messages', '${msg.id}')" class="text-[8px] text-rose-200 hover:text-white underline block mt-1">Delete</button>` : ''}
               </div>
@@ -1491,19 +1541,34 @@
       }
     }
 
-    function requestVaultAccessModal() {
-      alert("Vault Access Request sent to your chat partner!");
+    async function requestVaultAccessModal() {
+      if (!activeChatUserUid || activeChatUserUid === 'system') {
+        alert("Please select a direct conversation to request vault access.");
+        return;
+      }
+      try {
+        await db.collection("messages").add({
+          senderId: auth.currentUser.uid,
+          receiverId: activeChatUserUid,
+          text: `🔒 [Vault Access Request]: ${currentUserData.handle} has requested access to view your private image vault.`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("Vault Access Request sent successfully to your chat partner!");
+        loadChatMessages();
+      } catch (err) {
+        alert("Error sending vault request: " + err.message);
+      }
     }
 
     // --- VAULT TAB LOGIC & COMPRESSED VAULT UPLOADS ---
     async function uploadVaultLocalFile(input) {
       if (input.files && input.files[0]) {
         try {
-          const compressedDataUrl = await compressImageFile(input.files[0], 800, 0.7);
+          const compressedDataUrl = await compressImageFile(input.files[0], 600, 0.4);
           myVaultPhotos.push(compressedDataUrl);
           await saveVaultPhotosToCloud();
           renderVaultGrid();
-          alert("Photo added to your private vault!");
+          alert("Photo compressed and added to your private vault!");
         } catch (e) {
           alert("Error uploading file: " + e.message);
         }
@@ -1542,7 +1607,7 @@
       }
       myVaultPhotos.forEach((url, idx) => {
         grid.insertAdjacentHTML('beforeend', `
-          <div class="relative group h-24 bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+          <div class="relative group h-24 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow">
             <img src="${url}" class="w-full h-full object-cover">
             <button onclick="deleteVaultPhoto(${idx})" class="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-md px-1.5 py-0.5 text-[9px] font-bold shadow">✕</button>
           </div>
@@ -1576,14 +1641,14 @@
       try {
         const snap = await db.collection("networks").where("inviterId", "==", auth.currentUser.uid).get();
         if (snap.empty) {
-          list.innerHTML = `<div class="bg-slate-950 p-3 rounded-xl text-slate-500 text-center">No members invited yet.</div>`;
+          list.innerHTML = `<div class="bg-slate-950 p-3 rounded-xl text-slate-500 text-center shadow-inner">No members invited yet.</div>`;
           return;
         }
 
         snap.forEach(doc => {
           const net = doc.data();
           list.insertAdjacentHTML('beforeend', `
-            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center shadow-inner">
               <span class="font-bold text-white cursor-pointer hover:underline" onclick="openUserPublicProfileModal('${net.invitedUid}')">${net.handle}</span>
               <span class="text-[10px] text-emerald-400">Active Member</span>
             </div>
@@ -1632,7 +1697,7 @@
       let photoDataUrl = currentUserData.photoUrl || "";
       if (photoFileInput.files && photoFileInput.files[0]) {
         try {
-          photoDataUrl = await compressImageFile(photoFileInput.files[0], 600, 0.6);
+          photoDataUrl = await compressImageFile(photoFileInput.files[0], 400, 0.4);
         } catch (e) {
           console.error("Error compressing edit photo:", e);
         }
@@ -1667,10 +1732,10 @@
       const container = document.getElementById('myProfileContainer');
       const img = currentUserData.photoUrl ? 
         `<img src="${currentUserData.photoUrl}" class="w-20 h-20 rounded-2xl object-cover border border-slate-700 shadow-lg">` : 
-        `<div class="w-20 h-20 rounded-2xl bg-slate-950 flex items-center justify-center text-3xl border border-slate-800">📸</div>`;
+        `<div class="w-20 h-20 rounded-2xl bg-slate-950 flex items-center justify-center text-3xl border border-slate-800 shadow-inner">📸</div>`;
 
       container.innerHTML = `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 text-left shadow-xl">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 text-left shadow-2xl">
           <div class="flex justify-between items-start border-b border-slate-800 pb-4">
             <div class="flex space-x-3 items-center">
               ${img}
@@ -1686,13 +1751,13 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 text-[10px] bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+          <div class="grid grid-cols-2 gap-2 text-[10px] bg-slate-950 p-2.5 rounded-xl border border-slate-800 shadow-inner">
             <div><span class="text-slate-500">Orientation:</span> <span class="text-slate-200 font-semibold">${currentUserData.orientation || 'N/A'}</span></div>
             <div><span class="text-slate-500">Experience:</span> <span class="text-slate-200 font-semibold">${currentUserData.experience || 'N/A'}</span></div>
             <div class="col-span-2"><span class="text-slate-500">Affiliation:</span> <span class="text-slate-200 font-semibold">${currentUserData.affiliation || 'N/A'}</span></div>
           </div>
 
-          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1 shadow-inner">
             <span class="text-[10px] text-slate-500 uppercase font-bold">About Me / Us</span>
             <p class="text-slate-300 italic">${currentUserData.bio || 'No description provided.'}</p>
           </div>
@@ -1705,10 +1770,10 @@
           </div>
 
           <div class="flex space-x-2 pt-2">
-            <button onclick="openEditProfileModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+            <button onclick="openEditProfileModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow">
               Edit All Profile Details ✏️
             </button>
-            <button onclick="deleteAccount()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 font-bold px-4 py-2.5 rounded-xl text-xs transition">
+            <button onclick="deleteAccount()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 font-bold px-4 py-2.5 rounded-xl text-xs transition shadow">
               Delete Profile
             </button>
           </div>
