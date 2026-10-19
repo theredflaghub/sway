@@ -164,7 +164,7 @@
           </div>
         </div>
 
-        <!-- NEW: INTRODUCTION / ABOUT ME TEXTBOX -->
+        <!-- INTRODUCTION / ABOUT ME TEXTBOX -->
         <div>
           <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Introduce Yourself / About You</label>
           <textarea id="regBio" rows="3" placeholder="Tell the community about your interests, vibe, boundaries, or what makes your profile unique..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500 resize-none text-xs"></textarea>
@@ -285,38 +285,11 @@
       <button onclick="switchTab('profile')" id="tabProfile" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">My Profile</button>
     </nav>
 
-    <!-- 1. DISCOVERY DECK -->
+    <!-- 1. DYNAMIC DISCOVERY DECK -->
     <section id="contentDiscover" class="space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
-        <div class="relative h-72 sm:h-80 bg-slate-950 flex items-center justify-center overflow-hidden select-none">
-          <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-25 filter blur-xl" alt="Vault">
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-          
-          <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-2 z-10">
-            <span class="text-3xl">🔒</span>
-            <p class="font-bold text-sm text-slate-200">Private Vault Protected</p>
-            <p class="text-[11px] text-slate-400 max-w-xs">Verified photos are encrypted. Request access to exchange vault keys.</p>
-            <button onclick="alert('Vault permission request sent!')" class="mt-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-rose-900/40 transition">Request Vault Access</button>
-          </div>
-        </div>
-
-        <div class="p-5 space-y-3">
-          <div class="flex justify-between items-start">
-            <div>
-              <h2 class="text-xl font-bold text-white">Sofia & David <span class="text-rose-400 font-normal text-base">(31 / 34)</span></h2>
-              <p class="text-xs text-rose-400 font-semibold mt-0.5">Couple (M/F) • Manila, PH</p>
-            </div>
-            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2.5 py-1 rounded-full font-semibold">Active Now</span>
-          </div>
-
-          <p class="text-xs text-slate-300 leading-relaxed">Discreet Manila couple who love high-end social dinners, boutique beach resorts, and open-minded discussions. Looking for like-minded couples and unicorns for soft/full swap experiences.</p>
-
-          <div class="flex flex-wrap gap-1.5 pt-2">
-            <span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">Soft Swap</span>
-            <span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">Full Swap</span>
-            <span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">Unicorn</span>
-            <span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">BGC / Makati</span>
-          </div>
+      <div id="discoverDeckContainer" class="space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+          Loading member profiles...
         </div>
       </div>
     </section>
@@ -543,6 +516,7 @@
 
         document.getElementById("authGateModal").classList.add("hidden");
         alert("Cloud account created successfully! Welcome to Sway.");
+        loadDiscoverProfiles();
       } catch (error) {
         console.error("Registration error:", error);
         alert("Registration Error: " + error.message);
@@ -561,8 +535,75 @@
             renderUserProfile(data);
           }
         } catch (e) { console.error("Error loading user profile:", e); }
+
+        loadDiscoverProfiles();
       }
     });
+
+    // Fetch all registered users from Firestore and display in Discover tab
+    async function loadDiscoverProfiles() {
+      const deck = document.getElementById("discoverDeckContainer");
+      deck.innerHTML = "";
+
+      try {
+        const snapshot = await db.collection("users").orderBy("createdAt", "desc").get();
+
+        if (snapshot.empty) {
+          deck.innerHTML = `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+              No registered members found yet.
+            </div>`;
+          return;
+        }
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          
+          if (auth.currentUser && doc.id === auth.currentUser.uid) return;
+
+          const cardHtml = `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative transition hover:border-slate-700">
+              <div class="relative h-72 sm:h-80 bg-slate-950 flex items-center justify-center overflow-hidden select-none">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-2 z-10">
+                  <span class="text-3xl">🔒</span>
+                  <p class="font-bold text-sm text-slate-200">Private Vault Protected</p>
+                  <button onclick="alert('Vault permission request sent to ${data.handle}!')" class="mt-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-rose-900/40 transition">
+                    Request Vault Access
+                  </button>
+                </div>
+              </div>
+
+              <div class="p-5 space-y-3">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h2 class="text-xl font-bold text-white">${data.handle || '@Member'} <span class="text-rose-400 font-normal text-base">(${data.age || 'N/A'})</span></h2>
+                    <p class="text-xs text-rose-400 font-semibold mt-0.5 capitalize">${data.accountType || 'Member'} • ${data.location || 'Discreet'}</p>
+                  </div>
+                  <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2.5 py-1 rounded-full font-semibold">Verified Member</span>
+                </div>
+
+                <p class="text-xs text-slate-300 leading-relaxed italic border-l-2 border-rose-500/40 pl-2.5 py-0.5">
+                  "${data.bio || 'No introduction provided.'}"
+                </p>
+
+                <div class="flex flex-wrap gap-1.5 pt-2">
+                  ${(data.lookingFor || []).map(item => `<span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">${item}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+
+          deck.insertAdjacentHTML('beforeend', cardHtml);
+        });
+      } catch (error) {
+        console.error("Error fetching discover profiles:", error);
+        deck.innerHTML = `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-rose-400">
+            Error loading profiles: ${error.message}
+          </div>`;
+      }
+    }
 
     // Display user profile card with bio
     function renderUserProfile(data) {
