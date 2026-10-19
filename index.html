@@ -230,14 +230,22 @@
       </div>
     </div>
 
-    <div class="flex items-center space-x-2">
-      <div id="navRatingBadge" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2 py-1 rounded-lg font-bold flex items-center space-x-1">
+    <!-- USER SEARCH BAR IN HEADER -->
+    <div class="flex-1 max-w-[140px] sm:max-w-[180px] mx-2">
+      <div class="relative">
+        <input type="text" id="userSearchInput" onkeyup="searchUsersByHandle(this.value)" placeholder="🔍 Search @user..." class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1 px-2.5 text-[10px] text-white focus:outline-none focus:border-rose-500">
+        <div id="searchResultsDropdown" class="hidden absolute top-full left-0 right-0 bg-slate-900 border border-slate-800 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-2xl z-50 text-xs"></div>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-1.5">
+      <div id="navRatingBadge" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-1 rounded-lg font-bold flex items-center space-x-1">
         <span>⭐</span> <span id="navUserRating">5.0</span>
       </div>
-      <div class="bg-slate-800 text-slate-300 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg font-mono">
+      <div class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2 py-1 rounded-lg font-mono">
         <span id="navUserHandle">@Member</span>
       </div>
-      <button onclick="logoutMember()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg font-bold transition">
+      <button onclick="logoutMember()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 text-[10px] px-2 py-1 rounded-lg font-bold transition">
         Log Out
       </button>
     </div>
@@ -311,7 +319,11 @@
         <div id="activeChatBox" class="sm:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 h-[420px] flex flex-col justify-between">
           <div id="chatHeader" class="border-b border-slate-800 pb-3 flex justify-between items-center text-xs">
             <span id="chatPartnerName" class="font-bold text-white">Select a match or group chat</span>
-            <button onclick="requestVaultAccessModal()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold">Request Vault Access</button>
+            <div class="flex space-x-1">
+              <button id="leaveGroupBtn" onclick="leaveGroupChat()" class="hidden bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg text-[10px] font-bold">Leave Group ✕</button>
+              <button id="addMembersBtn" onclick="openAddMemberModal()" class="hidden bg-slate-800 text-slate-200 border border-slate-700 px-2 py-1 rounded-lg text-[10px] font-bold">+ Member</button>
+              <button onclick="requestVaultAccessModal()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold">Request Vault Access</button>
+            </div>
           </div>
 
           <div id="chatMessages" class="flex-1 overflow-y-auto py-3 space-y-2 text-xs">
@@ -393,6 +405,37 @@
     </section>
 
   </main>
+
+
+  <!-- ==================== USER PUBLIC PROFILE MODAL ==================== -->
+  <div id="userPublicProfileModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white">Member Profile</h3>
+        <button onclick="closeUserPublicProfileModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+      </div>
+
+      <div id="publicProfileModalBody" class="space-y-3 text-xs">
+        <!-- Content inserted dynamically -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== ADD MEMBER TO GROUP MODAL ==================== -->
+  <div id="addMemberModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white">Add Member to Group</h3>
+        <button onclick="closeAddMemberModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <input type="text" id="newMemberHandleInput" placeholder="Enter Username (e.g. @Sofia)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+        <button onclick="submitAddGroupMember()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Add Member →</button>
+      </div>
+    </div>
+  </div>
 
 
   <!-- ==================== EDIT PROFILE MODAL ==================== -->
@@ -479,6 +522,82 @@
         reader.onerror = error => reject(error);
         reader.readAsDataURL(file);
       });
+    }
+
+    // --- SEARCH MEMBER BY HANDLE ---
+    async function searchUsersByHandle(query) {
+      const dropdown = document.getElementById('searchResultsDropdown');
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = "";
+        return;
+      }
+
+      try {
+        const snap = await db.collection("users").get();
+        let matches = [];
+        snap.forEach(doc => {
+          const u = doc.data();
+          if (u.handle && u.handle.toLowerCase().includes(q) && u.uid !== auth.currentUser.uid) {
+            matches.push(u);
+          }
+        });
+
+        if (matches.length === 0) {
+          dropdown.innerHTML = `<div class="p-2.5 text-slate-500 text-center">No user found.</div>`;
+        } else {
+          dropdown.innerHTML = matches.map(m => `
+            <div onclick="openUserPublicProfileModal('${m.uid}')" class="p-2 hover:bg-slate-800 cursor-pointer flex justify-between items-center border-b border-slate-800/60">
+              <span class="font-bold text-white">${m.handle}</span>
+              <span class="text-[10px] text-rose-400 capitalize">${m.accountType}</span>
+            </div>
+          `).join('');
+        }
+        dropdown.classList.remove('hidden');
+      } catch (err) { console.error(err); }
+    }
+
+    async function openUserPublicProfileModal(uid) {
+      document.getElementById('searchResultsDropdown').classList.add('hidden');
+      document.getElementById('userSearchInput').value = "";
+      const modal = document.getElementById('userPublicProfileModal');
+      const body = document.getElementById('publicProfileModalBody');
+      body.innerHTML = `<div class="text-center py-6 text-slate-500">Loading profile...</div>`;
+      modal.classList.remove('hidden');
+
+      try {
+        const doc = await db.collection("users").doc(uid).get();
+        if (doc.exists) {
+          const u = doc.data();
+          const img = u.photoUrl ? `<img src="${u.photoUrl}" class="w-full h-40 object-cover rounded-xl border border-slate-800">` : `<div class="h-28 bg-slate-950 rounded-xl flex items-center justify-center border border-slate-800 text-3xl">📸</div>`;
+          body.innerHTML = `
+            ${img}
+            <div class="flex justify-between items-center pt-2">
+              <h3 class="text-base font-bold text-white">${u.handle} <span class="text-rose-400 text-xs font-normal">(${u.age || 'N/A'})</span></h3>
+              <span class="text-amber-400 font-bold">⭐ ${(u.rating || 5.0).toFixed(1)}</span>
+            </div>
+            <p class="text-xs text-rose-400 font-semibold capitalize">${u.accountType} • ${u.location}</p>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+              <span class="text-[9px] text-slate-500 uppercase font-bold">Bio</span>
+              <p class="text-slate-300 italic">${u.bio || 'No introduction provided.'}</p>
+            </div>
+            <button onclick="startDirectChatFromProfile('${u.uid}', '${u.handle}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">
+              Send Direct Message 💬
+            </button>
+          `;
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    function closeUserPublicProfileModal() {
+      document.getElementById('userPublicProfileModal').classList.add('hidden');
+    }
+
+    function startDirectChatFromProfile(partnerUid, partnerHandle) {
+      closeUserPublicProfileModal();
+      switchTab('messages');
+      openChat(partnerUid, partnerHandle);
     }
 
     // --- AUTH TOGGLE ---
@@ -595,6 +714,7 @@
           affiliation: affiliation,
           lookingFor: lookingFor,
           photoUrl: photoDataUrl,
+          vaultPhotos: [],
           rating: 5.0,
           reportsCount: 0,
           banned: false,
@@ -651,6 +771,7 @@
             window.location.reload();
             return;
           }
+          myVaultPhotos = currentUserData.vaultPhotos || [];
           document.getElementById('navUserHandle').innerText = currentUserData.handle || "@Member";
           document.getElementById('navUserRating').innerText = (currentUserData.rating || 5.0).toFixed(1);
           loadDiscoverDeck();
@@ -658,6 +779,7 @@
           loadInbox();
           loadNetwork();
           renderMyProfile();
+          renderVaultGrid();
         }
       }
     });
@@ -705,7 +827,7 @@
         <div class="space-y-2 pt-3 flex-1 flex flex-col justify-between">
           <div>
             <div class="flex justify-between items-start">
-              <h2 class="text-lg font-bold text-white">${profile.handle || '@Member'} <span class="text-rose-400 font-normal text-sm">(${profile.age || 'N/A'})</span></h2>
+              <h2 class="text-lg font-bold text-white cursor-pointer hover:underline" onclick="openUserPublicProfileModal('${profile.uid}')">${profile.handle || '@Member'} <span class="text-rose-400 font-normal text-sm">(${profile.age || 'N/A'})</span></h2>
               <span class="text-amber-400 text-xs font-bold">⭐ ${(profile.rating || 5.0).toFixed(1)}</span>
             </div>
             <p class="text-xs text-rose-400 font-semibold capitalize">${profile.accountType || 'Member'} • ${profile.location || 'Discreet'}</p>
@@ -726,18 +848,20 @@
           matchedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Automatic Match Notification Message for both users
+        // Clickable username match notification
+        const matchNoticeText = `🎉 It's a Match! You and <span onclick="startDirectChatFromProfile('${target.uid}', '${target.handle}')" class="underline font-bold text-rose-400 cursor-pointer">${target.handle}</span> liked each other! Click their username to message directly.`;
+
         await db.collection("messages").add({
           senderId: auth.currentUser.uid,
           receiverId: target.uid,
-          text: `🎉 It's a Match! You and ${currentUserData.handle} liked each other. You can now chat directly and request Vault access!`,
+          text: matchNoticeText,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         await db.collection("messages").add({
           senderId: target.uid,
           receiverId: auth.currentUser.uid,
-          text: `🎉 It's a Match! You and ${target.handle} liked each other. You can now chat directly and request Vault access!`,
+          text: matchNoticeText,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -756,7 +880,7 @@
       renderCurrentDiscoverCard();
     }
 
-    // --- EVENTS HUB WITH HOST APPROVAL ---
+    // --- EVENTS HUB WITH LIVE APPLICANT / APPROVED COUNTS & SINGLE-APPLY ---
     function openHostEventModal() { document.getElementById('hostEventModal').classList.remove('hidden'); }
     function closeHostEventModal() { document.getElementById('hostEventModal').classList.add('hidden'); }
 
@@ -806,9 +930,50 @@
           return;
         }
 
-        snap.forEach(doc => {
+        for (let doc of snap.docs) {
           const ev = doc.data();
           const isHost = ev.hostUid === auth.currentUser.uid;
+
+          // Query live application stats
+          const allRsvps = await db.collection("event_rsvps").where("eventId", "==", doc.id).get();
+          const appliedCount = allRsvps.size;
+          let approvedCount = 0;
+          let myRsvpStatus = null;
+
+          allRsvps.forEach(rDoc => {
+            const r = rDoc.data();
+            if (r.status === "approved") approvedCount++;
+            if (r.userUid === auth.currentUser.uid) myRsvpStatus = r.status;
+          });
+
+          let actionBtnHtml = "";
+          if (isHost) {
+            actionBtnHtml = `
+              <div class="bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl text-[10px] text-amber-300 font-bold">
+                👑 You are hosting this event. Manage applications above.
+              </div>`;
+          } else if (myRsvpStatus === "approved") {
+            actionBtnHtml = `
+              <div class="bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-xl text-[10px] text-emerald-400 font-bold text-center">
+                ✓ Application Approved! Venue: ${ev.exactLocation} | Password: ${ev.eventPassword}
+              </div>`;
+          } else if (myRsvpStatus === "declined") {
+            actionBtnHtml = `
+              <div class="bg-red-500/10 border border-red-500/20 p-2 rounded-xl text-[10px] text-red-400 font-bold text-center">
+                ✕ Application Declined by Host
+              </div>`;
+          } else if (myRsvpStatus === "pending") {
+            actionBtnHtml = `
+              <button disabled class="w-full bg-slate-800 text-slate-500 font-bold py-2 rounded-xl text-xs cursor-not-allowed">
+                Application Pending Approval...
+              </button>`;
+          } else {
+            actionBtnHtml = `
+              <button onclick="requestEventRSVP('${doc.id}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                Apply & Request RSVP Approval
+              </button>`;
+          }
+
           const card = `
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
               <div class="flex justify-between items-start text-xs">
@@ -817,23 +982,19 @@
               </div>
               <h4 class="text-sm font-bold text-white">${ev.title}</h4>
               <p class="text-xs text-slate-400">📍 ${ev.generalLocation} • Hosted by ${ev.hostHandle}</p>
+              <div class="flex space-x-3 text-[10px] text-slate-300 font-bold pt-1">
+                <span class="bg-slate-950 px-2 py-1 rounded-md border border-slate-800">📩 Applied: ${appliedCount}</span>
+                <span class="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md border border-emerald-500/20">✓ Approved: ${approvedCount}</span>
+              </div>
               <div class="bg-slate-950 p-2.5 rounded-xl text-[11px] text-slate-300 space-y-1">
                 <p class="font-bold text-rose-400 uppercase text-[9px]">Event Rules:</p>
                 <p>${ev.rules}</p>
               </div>
-              ${isHost ? `
-                <div class="bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl text-[10px] text-amber-300 font-bold">
-                  👑 You are hosting this event. Manage applications above.
-                </div>
-              ` : `
-                <button onclick="requestEventRSVP('${doc.id}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-xs transition">
-                  Apply & Request RSVP Approval
-                </button>
-              `}
+              ${actionBtnHtml}
             </div>
           `;
           container.insertAdjacentHTML('beforeend', card);
-        });
+        }
 
         loadHostedApplications();
       } catch (err) { console.error(err); }
@@ -848,6 +1009,7 @@
         requestedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       alert("RSVP Application Submitted! The event host must approve your application before exact venue details are revealed.");
+      loadEvents();
     }
 
     async function loadHostedApplications() {
@@ -876,7 +1038,7 @@
             list.insertAdjacentHTML('beforeend', `
               <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
                 <div>
-                  <p class="font-bold text-white">${rsvp.userHandle}</p>
+                  <p class="font-bold text-white cursor-pointer hover:underline" onclick="openUserPublicProfileModal('${rsvp.userUid}')">${rsvp.userHandle}</p>
                   <p class="text-[9px] text-slate-400">Applied for: ${evData.title}</p>
                 </div>
                 <div class="flex space-x-1">
@@ -901,7 +1063,6 @@
     async function approveRSVP(rsvpId, exactLocation, eventPassword, applicantUid) {
       await db.collection("event_rsvps").doc(rsvpId).update({ status: "approved" });
       
-      // Notify approved user with exact location and password
       await db.collection("messages").add({
         senderId: auth.currentUser.uid,
         receiverId: applicantUid,
@@ -910,16 +1071,16 @@
       });
 
       alert("Applicant Approved! Venue location and access password have been sent to their inbox.");
-      loadHostedApplications();
+      loadEvents();
     }
 
     async function declineRSVP(rsvpId) {
       await db.collection("event_rsvps").doc(rsvpId).update({ status: "declined" });
       alert("Application declined.");
-      loadHostedApplications();
+      loadEvents();
     }
 
-    // --- MESSAGES, GROUP CHAT & LIVE CHAT BOX ---
+    // --- MESSAGES, GROUP CHAT, ADD MEMBER & LEAVE GROUP ---
     function openCreateGroupModal() { document.getElementById('createGroupModal').classList.remove('hidden'); }
     function closeCreateGroupModal() { document.getElementById('createGroupModal').classList.add('hidden'); }
 
@@ -941,6 +1102,53 @@
       } catch (err) { alert("Error creating group: " + err.message); }
     }
 
+    function openAddMemberModal() {
+      if (!activeGroupId) return;
+      document.getElementById('addMemberModal').classList.remove('hidden');
+    }
+
+    function closeAddMemberModal() {
+      document.getElementById('addMemberModal').classList.add('hidden');
+    }
+
+    async function submitAddGroupMember() {
+      const newHandle = document.getElementById('newMemberHandleInput').value.trim();
+      if (!newHandle || !activeGroupId) return;
+
+      try {
+        const doc = await db.collection("groups").doc(activeGroupId).get();
+        if (doc.exists) {
+          const members = doc.data().members || [];
+          if (!members.includes(newHandle)) {
+            members.push(newHandle);
+            await db.collection("groups").doc(activeGroupId).update({ members: members });
+            alert(`${newHandle} added to group!`);
+          } else {
+            alert("Member already in group.");
+          }
+        }
+        closeAddMemberModal();
+      } catch (err) { alert("Error adding member: " + err.message); }
+    }
+
+    async function leaveGroupChat() {
+      if (!activeGroupId) return;
+      if (confirm("Are you sure you want to leave this group chat?")) {
+        try {
+          const doc = await db.collection("groups").doc(activeGroupId).get();
+          if (doc.exists) {
+            let members = doc.data().members || [];
+            members = members.filter(m => m !== currentUserData.handle);
+            await db.collection("groups").doc(activeGroupId).update({ members: members });
+            alert("You left the group.");
+            activeGroupId = null;
+            document.getElementById('activeChatBox').classList.add('hidden');
+            loadInbox();
+          }
+        } catch (err) { alert("Error leaving group: " + err.message); }
+      }
+    }
+
     async function loadInbox() {
       const list = document.getElementById('inboxConversations');
       list.innerHTML = "";
@@ -949,7 +1157,6 @@
         const senders = new Set();
         snap.forEach(doc => senders.add(doc.data().senderId));
 
-        // Load Group Chats
         const groupSnap = await db.collection("groups").get();
         groupSnap.forEach(gDoc => {
           const gData = gDoc.data();
@@ -1001,6 +1208,8 @@
       activeGroupId = null;
       document.getElementById('activeChatBox').classList.remove('hidden');
       document.getElementById('chatPartnerName').innerText = partnerName;
+      document.getElementById('leaveGroupBtn').classList.add('hidden');
+      document.getElementById('addMembersBtn').classList.add('hidden');
       loadChatMessages();
     }
 
@@ -1009,6 +1218,8 @@
       activeChatUserUid = null;
       document.getElementById('activeChatBox').classList.remove('hidden');
       document.getElementById('chatPartnerName').innerText = groupTitle + " (Group)";
+      document.getElementById('leaveGroupBtn').classList.remove('hidden');
+      document.getElementById('addMembersBtn').classList.remove('hidden');
       loadGroupMessages();
     }
 
@@ -1021,10 +1232,11 @@
           const msg = doc.data();
           const isMe = msg.senderUid === auth.currentUser.uid;
           container.insertAdjacentHTML('beforeend', `
-            <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-              <div class="max-w-[75%] p-2.5 rounded-xl ${isMe ? 'bg-rose-600 text-white' : 'bg-slate-950 text-slate-200 border border-slate-800'}">
-                <p class="text-[9px] text-rose-300 font-bold">${msg.senderHandle}</p>
+            <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group">
+              <div class="max-w-[75%] p-2.5 rounded-xl relative ${isMe ? 'bg-rose-600 text-white' : 'bg-slate-950 text-slate-200 border border-slate-800'}">
+                <p class="text-[9px] text-rose-300 font-bold cursor-pointer hover:underline" onclick="openUserPublicProfileModal('${msg.senderUid}')">${msg.senderHandle}</p>
                 <p>${msg.text}</p>
+                ${isMe ? `<button onclick="deleteMessage('group_messages', '${doc.id}')" class="text-[8px] text-slate-300 hover:text-white underline block mt-1">Delete</button>` : ''}
               </div>
             </div>
           `);
@@ -1047,12 +1259,21 @@
               <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
                 <div class="max-w-[75%] p-2.5 rounded-xl ${isMe ? 'bg-rose-600 text-white' : 'bg-slate-950 text-slate-200 border border-slate-800'}">
                   <p>${msg.text}</p>
+                  ${isMe ? `<button onclick="deleteMessage('messages', '${doc.id}')" class="text-[8px] text-rose-200 hover:text-white underline block mt-1">Delete</button>` : ''}
                 </div>
               </div>
             `);
           }
         });
       } catch (err) { console.error(err); }
+    }
+
+    async function deleteMessage(collectionName, msgDocId) {
+      if (confirm("Delete this message?")) {
+        await db.collection(collectionName).doc(msgDocId).delete();
+        if (collectionName === 'group_messages') loadGroupMessages();
+        else loadChatMessages();
+      }
     }
 
     async function sendChatMessage() {
@@ -1095,12 +1316,13 @@
       alert("Vault Access Request sent to your chat partner!");
     }
 
-    // --- VAULT TAB LOGIC ---
+    // --- VAULT TAB LOGIC & DELETE VAULT PHOTOS ---
     async function uploadVaultLocalFile(input) {
       if (input.files && input.files[0]) {
         try {
           const dataUrl = await fileToBase64(input.files[0]);
           myVaultPhotos.push(dataUrl);
+          await saveVaultPhotosToCloud();
           renderVaultGrid();
           alert("Photo added to your private vault!");
         } catch (e) {
@@ -1109,25 +1331,41 @@
       }
     }
 
-    function addVaultPhotoUrl() {
+    async function addVaultPhotoUrl() {
       const url = document.getElementById('vaultPhotoUrl').value.trim();
       if (!url) return;
       myVaultPhotos.push(url);
       document.getElementById('vaultPhotoUrl').value = "";
+      await saveVaultPhotosToCloud();
       renderVaultGrid();
+    }
+
+    async function deleteVaultPhoto(index) {
+      if (confirm("Delete this picture from your vault?")) {
+        myVaultPhotos.splice(index, 1);
+        await saveVaultPhotosToCloud();
+        renderVaultGrid();
+      }
+    }
+
+    async function saveVaultPhotosToCloud() {
+      await db.collection("users").doc(auth.currentUser.uid).update({
+        vaultPhotos: myVaultPhotos
+      });
     }
 
     function renderVaultGrid() {
       const grid = document.getElementById('vaultGrid');
       grid.innerHTML = "";
-      if (myVaultPhotos.length === 0) {
+      if (!myVaultPhotos || myVaultPhotos.length === 0) {
         grid.innerHTML = `<div class="col-span-3 text-center py-6 text-slate-500 text-xs">No private photos added to vault yet.</div>`;
         return;
       }
-      myVaultPhotos.forEach(url => {
+      myVaultPhotos.forEach((url, idx) => {
         grid.insertAdjacentHTML('beforeend', `
-          <div class="h-24 bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+          <div class="relative group h-24 bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
             <img src="${url}" class="w-full h-full object-cover">
+            <button onclick="deleteVaultPhoto(${idx})" class="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-md px-1.5 py-0.5 text-[9px] font-bold shadow">✕</button>
           </div>
         `);
       });
@@ -1167,7 +1405,7 @@
           const net = doc.data();
           list.insertAdjacentHTML('beforeend', `
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
-              <span class="font-bold text-white">${net.handle}</span>
+              <span class="font-bold text-white cursor-pointer hover:underline" onclick="openUserPublicProfileModal('${net.invitedUid}')">${net.handle}</span>
               <span class="text-[10px] text-emerald-400">Active Member</span>
             </div>
           `);
