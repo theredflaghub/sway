@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sway — Where discretion meets connection</title>
+  <title>Sway — Exclusive Private Social Network</title>
 
   <meta name="theme-color" content="#020617">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -57,7 +57,7 @@
   <div id="authGateModal" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4 overflow-y-auto">
     <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-auto">
       
-      <!-- Brand Logo -->
+      <!-- Brand Logo & Tagline -->
       <div class="flex flex-col items-center space-y-2 text-center">
         <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-xl shadow-rose-900/50 border border-rose-400/30">
           <svg class="w-8 h-8 text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -65,7 +65,7 @@
           </svg>
         </div>
         <h1 class="text-2xl font-black tracking-wider uppercase bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent">Sway</h1>
-        <p class="text-xs text-rose-400 font-medium">Safe, Discretion-First Swinger Community</p>
+        <p class="text-xs text-rose-400 font-medium">Exclusive Private Social Network</p>
       </div>
 
       <!-- STEP 1: INVITE CODE GATE -->
@@ -226,7 +226,7 @@
       </div>
       <div>
         <span class="font-black text-lg tracking-wider uppercase bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent block leading-none">Sway</span>
-        <span class="text-[9px] text-slate-400 font-medium tracking-tight block mt-0.5">Exclusive Community</span>
+        <span class="text-[9px] text-slate-400 font-medium tracking-tight block mt-0.5">Exclusive Private Social Network</span>
       </div>
     </div>
 
@@ -303,7 +303,10 @@
     <section id="contentMessages" class="hidden space-y-3">
       <div class="flex justify-between items-center bg-slate-900 border border-slate-800 p-3 rounded-2xl">
         <h3 class="text-xs font-bold text-white">Conversations & Group Chats</h3>
-        <button onclick="openCreateGroupModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] px-3 py-1.5 rounded-xl transition">Create Group Chat +</button>
+        <div class="flex space-x-1.5">
+          <button onclick="openNewDirectChatModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] px-3 py-1.5 rounded-xl border border-slate-700 transition">New Chat +</button>
+          <button onclick="openCreateGroupModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] px-3 py-1.5 rounded-xl transition">Create Group +</button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -318,7 +321,7 @@
         <!-- Live Chat Box -->
         <div id="activeChatBox" class="sm:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 h-[420px] flex flex-col justify-between">
           <div id="chatHeader" class="border-b border-slate-800 pb-3 flex justify-between items-center text-xs">
-            <span id="chatPartnerName" class="font-bold text-white">Select a match or group chat</span>
+            <span id="chatPartnerName" class="font-bold text-white">Select a conversation or group</span>
             <div class="flex space-x-1">
               <button id="leaveGroupBtn" onclick="leaveGroupChat()" class="hidden bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg text-[10px] font-bold">Leave Group ✕</button>
               <button id="addMembersBtn" onclick="openAddMemberModal()" class="hidden bg-slate-800 text-slate-200 border border-slate-700 px-2 py-1 rounded-lg text-[10px] font-bold">+ Member</button>
@@ -407,6 +410,23 @@
   </main>
 
 
+  <!-- ==================== NEW DIRECT CHAT MODAL ==================== -->
+  <div id="newDirectChatModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white">Start New Direct Chat</h3>
+        <button onclick="closeNewDirectChatModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <label class="block text-slate-400 font-semibold text-[10px] uppercase">Enter Recipient Handle or Username</label>
+        <input type="text" id="directChatHandleInput" placeholder="e.g. @AlexAndElena" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+        <button onclick="submitStartDirectChat()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Open Conversation →</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- ==================== USER PUBLIC PROFILE MODAL ==================== -->
   <div id="userPublicProfileModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-2xl">
@@ -440,19 +460,83 @@
 
   <!-- ==================== EDIT PROFILE MODAL ==================== -->
   <div id="editProfileModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-3 shadow-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 class="text-sm font-bold text-white">Edit My Profile</h3>
         <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
       </div>
 
       <div class="space-y-2 text-xs">
-        <input type="text" id="editHandle" placeholder="Username / Handle" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
-        <input type="text" id="editAge" placeholder="Age (e.g. 32 / 30)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
-        <input type="text" id="editLocation" placeholder="Location" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
-        <textarea id="editBio" rows="3" placeholder="About Me / Us..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white resize-none"></textarea>
+        <div>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Username / Handle</label>
+          <input type="text" id="editHandle" placeholder="Username / Handle" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+        </div>
         
-        <button onclick="saveProfileChanges()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Save Changes →</button>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Account Type</label>
+            <select id="editType" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+              <option value="couple">Couple</option>
+              <option value="single-female">Single Female</option>
+              <option value="single-male">Single Male</option>
+              <option value="watcher">Watcher / Single</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Age (or Couple Ages)</label>
+            <input type="text" id="editAge" placeholder="Age (e.g. 32 / 30)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Sexual Orientation</label>
+            <input type="text" id="editOrientation" placeholder="Orientation" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Location</label>
+            <input type="text" id="editLocation" placeholder="Location" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Experience Level</label>
+            <select id="editExperience" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+              <option>Newbie / Exploring</option>
+              <option>With Experience</option>
+              <option>Community Veteran</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Community Affiliation</label>
+            <input type="text" id="editAffiliation" placeholder="Affiliation" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">About Me / Us</label>
+          <textarea id="editBio" rows="3" placeholder="About Me / Us..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1.5">What Are You Looking For?</label>
+          <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11px]">
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="editLookingFor" value="Soft Swap" class="accent-rose-500"> <span>Soft Swap</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="editLookingFor" value="Full Swap" class="accent-rose-500"> <span>Full Swap</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="editLookingFor" value="Unicorn" class="accent-rose-500"> <span>Unicorn</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="editLookingFor" value="Bull" class="accent-rose-500"> <span>Bull</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="editLookingFor" value="Watcher" class="accent-rose-500"> <span>Watcher</span></label>
+            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="editLookingFor" value="Community Friend" class="accent-rose-500"> <span>Community Friend</span></label>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase">Update Profile Display Photo</label>
+          <input type="file" id="editPhotoFile" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-rose-600 file:text-white cursor-pointer">
+        </div>
+        
+        <button onclick="saveProfileChanges()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">Save All Profile Changes →</button>
       </div>
     </div>
   </div>
@@ -514,13 +598,35 @@
     let activeGroupId = null;
     let myVaultPhotos = [];
 
-    // Utility: Convert File to Base64 String
-    function fileToBase64(file) {
+    // Compress & Resize Image File to prevent Firestore document size limit errors (1MB max)
+    function compressImageFile(file, maxWidth = 800, quality = 0.7) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
         reader.readAsDataURL(file);
+        reader.onload = event => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedDataUrl);
+          };
+          img.onerror = err => reject(err);
+        };
+        reader.onerror = err => reject(err);
       });
     }
 
@@ -571,16 +677,25 @@
         if (doc.exists) {
           const u = doc.data();
           const img = u.photoUrl ? `<img src="${u.photoUrl}" class="w-full h-40 object-cover rounded-xl border border-slate-800">` : `<div class="h-28 bg-slate-950 rounded-xl flex items-center justify-center border border-slate-800 text-3xl">📸</div>`;
+          
           body.innerHTML = `
             ${img}
-            <div class="flex justify-between items-center pt-2">
+            <div class="flex justify-between items-center pt-1">
               <h3 class="text-base font-bold text-white">${u.handle} <span class="text-rose-400 text-xs font-normal">(${u.age || 'N/A'})</span></h3>
               <span class="text-amber-400 font-bold">⭐ ${(u.rating || 5.0).toFixed(1)}</span>
             </div>
             <p class="text-xs text-rose-400 font-semibold capitalize">${u.accountType} • ${u.location}</p>
+            <div class="grid grid-cols-2 gap-2 text-[10px] bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+              <div><span class="text-slate-500">Orientation:</span> <span class="text-slate-200 font-semibold">${u.orientation || 'N/A'}</span></div>
+              <div><span class="text-slate-500">Experience:</span> <span class="text-slate-200 font-semibold">${u.experience || 'N/A'}</span></div>
+              <div class="col-span-2"><span class="text-slate-500">Affiliation:</span> <span class="text-slate-200 font-semibold">${u.affiliation || 'N/A'}</span></div>
+            </div>
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
               <span class="text-[9px] text-slate-500 uppercase font-bold">Bio</span>
               <p class="text-slate-300 italic">${u.bio || 'No introduction provided.'}</p>
+            </div>
+            <div class="flex flex-wrap gap-1">
+              ${(u.lookingFor || []).map(i => `<span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded">${i}</span>`).join('')}
             </div>
             <button onclick="startDirectChatFromProfile('${u.uid}', '${u.handle}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition">
               Send Direct Message 💬
@@ -672,9 +787,9 @@
       let photoDataUrl = "";
       if (photoFileInput.files && photoFileInput.files[0]) {
         try {
-          photoDataUrl = await fileToBase64(photoFileInput.files[0]);
+          photoDataUrl = await compressImageFile(photoFileInput.files[0], 600, 0.6);
         } catch (e) {
-          console.error("Error reading photo file:", e);
+          console.error("Error processing photo file:", e);
         }
       }
 
@@ -848,7 +963,6 @@
           matchedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Clickable username match notification
         const matchNoticeText = `🎉 It's a Match! You and <span onclick="startDirectChatFromProfile('${target.uid}', '${target.handle}')" class="underline font-bold text-rose-400 cursor-pointer">${target.handle}</span> liked each other! Click their username to message directly.`;
 
         await db.collection("messages").add({
@@ -934,7 +1048,6 @@
           const ev = doc.data();
           const isHost = ev.hostUid === auth.currentUser.uid;
 
-          // Query live application stats
           const allRsvps = await db.collection("event_rsvps").where("eventId", "==", doc.id).get();
           const appliedCount = allRsvps.size;
           let approvedCount = 0;
@@ -1080,6 +1193,43 @@
       loadEvents();
     }
 
+    // --- NEW DIRECT CHAT FEATURE VIA USERNAME ---
+    function openNewDirectChatModal() {
+      document.getElementById('newDirectChatModal').classList.remove('hidden');
+    }
+
+    function closeNewDirectChatModal() {
+      document.getElementById('newDirectChatModal').classList.add('hidden');
+    }
+
+    async function submitStartDirectChat() {
+      let inputHandle = document.getElementById('directChatHandleInput').value.trim();
+      if (!inputHandle) { alert("Please enter a username or handle."); return; }
+      if (!inputHandle.startsWith('@')) inputHandle = '@' + inputHandle;
+
+      try {
+        const snap = await db.collection("users").where("handle", "==", inputHandle).get();
+        if (snap.empty) {
+          alert(`User "${inputHandle}" not found.`);
+          return;
+        }
+
+        let targetUser = null;
+        snap.forEach(doc => targetUser = doc.data());
+
+        if (targetUser.uid === auth.currentUser.uid) {
+          alert("You cannot start a direct chat with yourself.");
+          return;
+        }
+
+        closeNewDirectChatModal();
+        switchTab('messages');
+        openChat(targetUser.uid, targetUser.handle);
+      } catch (err) {
+        alert("Error starting chat: " + err.message);
+      }
+    }
+
     // --- MESSAGES, GROUP CHAT, ADD MEMBER & LEAVE GROUP ---
     function openCreateGroupModal() { document.getElementById('createGroupModal').classList.remove('hidden'); }
     function closeCreateGroupModal() { document.getElementById('createGroupModal').classList.add('hidden'); }
@@ -1089,11 +1239,14 @@
       const handlesText = document.getElementById('groupMemberHandles').value.trim();
       if (!title) { alert("Please enter a group title."); return; }
 
+      const rawHandles = handlesText.split(',').map(h => h.trim()).filter(h => h.length > 0);
+      const formattedHandles = rawHandles.map(h => h.startsWith('@') ? h : '@' + h);
+
       try {
         await db.collection("groups").add({
           title: title,
           createdBy: auth.currentUser.uid,
-          members: [currentUserData.handle, ...handlesText.split(',').map(h => h.trim())],
+          members: [currentUserData.handle, ...formattedHandles],
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         alert("Group chat created successfully!");
@@ -1112,8 +1265,9 @@
     }
 
     async function submitAddGroupMember() {
-      const newHandle = document.getElementById('newMemberHandleInput').value.trim();
+      let newHandle = document.getElementById('newMemberHandleInput').value.trim();
       if (!newHandle || !activeGroupId) return;
+      if (!newHandle.startsWith('@')) newHandle = '@' + newHandle;
 
       try {
         const doc = await db.collection("groups").doc(activeGroupId).get();
@@ -1153,10 +1307,14 @@
       const list = document.getElementById('inboxConversations');
       list.innerHTML = "";
       try {
-        const snap = await db.collection("messages").where("receiverId", "==", auth.currentUser.uid).get();
-        const senders = new Set();
-        snap.forEach(doc => senders.add(doc.data().senderId));
+        const snapSent = await db.collection("messages").where("senderId", "==", auth.currentUser.uid).get();
+        const snapReceived = await db.collection("messages").where("receiverId", "==", auth.currentUser.uid).get();
+        
+        const chatPartners = new Set();
+        snapSent.forEach(doc => chatPartners.add(doc.data().receiverId));
+        snapReceived.forEach(doc => chatPartners.add(doc.data().senderId));
 
+        // Load Group Chats where user is a member
         const groupSnap = await db.collection("groups").get();
         groupSnap.forEach(gDoc => {
           const gData = gDoc.data();
@@ -1173,8 +1331,8 @@
           }
         });
 
-        senders.forEach(async (senderId) => {
-          if (senderId === "system") {
+        chatPartners.forEach(async (partnerId) => {
+          if (partnerId === "system") {
             list.insertAdjacentHTML('beforeend', `
               <div onclick="openChat('system', 'System Welcome')" class="p-2.5 bg-slate-950 rounded-xl cursor-pointer hover:bg-slate-800 transition text-xs flex items-center space-x-2">
                 <span class="text-rose-500 font-bold">🛡️</span>
@@ -1184,16 +1342,16 @@
                 </div>
               </div>
             `);
-          } else {
-            const userDoc = await db.collection("users").doc(senderId).get();
+          } else if (partnerId !== auth.currentUser.uid) {
+            const userDoc = await db.collection("users").doc(partnerId).get();
             if (userDoc.exists) {
               const uData = userDoc.data();
               list.insertAdjacentHTML('beforeend', `
                 <div onclick="openChat('${uData.uid}', '${uData.handle}')" class="p-2.5 bg-slate-950 rounded-xl cursor-pointer hover:bg-slate-800 transition text-xs flex items-center space-x-2">
-                  <div class="w-8 h-8 rounded-lg bg-rose-600/20 text-rose-400 font-bold flex items-center justify-center">${(uData.handle || 'M').charAt(1)}</div>
+                  <div class="w-8 h-8 rounded-lg bg-rose-600/20 text-rose-400 font-bold flex items-center justify-center">${(uData.handle || 'M').charAt(0) === '@' ? (uData.handle.charAt(1) || 'M') : uData.handle.charAt(0)}</div>
                   <div>
                     <p class="font-bold text-white">${uData.handle}</p>
-                    <p class="text-[10px] text-slate-400">Encrypted Chat</p>
+                    <p class="text-[10px] text-slate-400">Direct Message</p>
                   </div>
                 </div>
               `);
@@ -1228,19 +1386,24 @@
       container.innerHTML = "";
       try {
         const snap = await db.collection("group_messages").where("groupId", "==", activeGroupId).get();
-        snap.forEach(doc => {
-          const msg = doc.data();
+        let msgs = [];
+        snap.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+        
+        msgs.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+
+        msgs.forEach(msg => {
           const isMe = msg.senderUid === auth.currentUser.uid;
           container.insertAdjacentHTML('beforeend', `
             <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group">
               <div class="max-w-[75%] p-2.5 rounded-xl relative ${isMe ? 'bg-rose-600 text-white' : 'bg-slate-950 text-slate-200 border border-slate-800'}">
                 <p class="text-[9px] text-rose-300 font-bold cursor-pointer hover:underline" onclick="openUserPublicProfileModal('${msg.senderUid}')">${msg.senderHandle}</p>
                 <p>${msg.text}</p>
-                ${isMe ? `<button onclick="deleteMessage('group_messages', '${doc.id}')" class="text-[8px] text-slate-300 hover:text-white underline block mt-1">Delete</button>` : ''}
+                ${isMe ? `<button onclick="deleteMessage('group_messages', '${msg.id}')" class="text-[8px] text-slate-300 hover:text-white underline block mt-1">Delete</button>` : ''}
               </div>
             </div>
           `);
         });
+        container.scrollTop = container.scrollHeight;
       } catch (err) { console.error(err); }
     }
 
@@ -1248,23 +1411,39 @@
       const container = document.getElementById('chatMessages');
       container.innerHTML = "";
       try {
-        const snap = await db.collection("messages").get();
-        snap.forEach(doc => {
-          const msg = doc.data();
-          if ((msg.senderId === auth.currentUser.uid && msg.receiverId === activeChatUserUid) ||
-              (msg.senderId === activeChatUserUid && msg.receiverId === auth.currentUser.uid) ||
-              (msg.receiverId === auth.currentUser.uid && msg.senderId === "system")) {
-            const isMe = msg.senderId === auth.currentUser.uid;
-            container.insertAdjacentHTML('beforeend', `
-              <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-                <div class="max-w-[75%] p-2.5 rounded-xl ${isMe ? 'bg-rose-600 text-white' : 'bg-slate-950 text-slate-200 border border-slate-800'}">
-                  <p>${msg.text}</p>
-                  ${isMe ? `<button onclick="deleteMessage('messages', '${doc.id}')" class="text-[8px] text-rose-200 hover:text-white underline block mt-1">Delete</button>` : ''}
-                </div>
+        const snap1 = await db.collection("messages")
+          .where("senderId", "==", auth.currentUser.uid)
+          .where("receiverId", "==", activeChatUserUid).get();
+          
+        const snap2 = await db.collection("messages")
+          .where("senderId", "==", activeChatUserUid)
+          .where("receiverId", "==", auth.currentUser.uid).get();
+
+        let msgs = [];
+        snap1.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+        snap2.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+
+        if (activeChatUserUid === "system") {
+          const sysSnap = await db.collection("messages")
+            .where("senderId", "==", "system")
+            .where("receiverId", "==", auth.currentUser.uid).get();
+          sysSnap.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+        }
+
+        msgs.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+
+        msgs.forEach(msg => {
+          const isMe = msg.senderId === auth.currentUser.uid;
+          container.insertAdjacentHTML('beforeend', `
+            <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+              <div class="max-w-[75%] p-2.5 rounded-xl ${isMe ? 'bg-rose-600 text-white' : 'bg-slate-950 text-slate-200 border border-slate-800'}">
+                <p>${msg.text}</p>
+                ${isMe ? `<button onclick="deleteMessage('messages', '${msg.id}')" class="text-[8px] text-rose-200 hover:text-white underline block mt-1">Delete</button>` : ''}
               </div>
-            `);
-          }
+            </div>
+          `);
         });
+        container.scrollTop = container.scrollHeight;
       } catch (err) { console.error(err); }
     }
 
@@ -1316,17 +1495,17 @@
       alert("Vault Access Request sent to your chat partner!");
     }
 
-    // --- VAULT TAB LOGIC & DELETE VAULT PHOTOS ---
+    // --- VAULT TAB LOGIC & COMPRESSED VAULT UPLOADS ---
     async function uploadVaultLocalFile(input) {
       if (input.files && input.files[0]) {
         try {
-          const dataUrl = await fileToBase64(input.files[0]);
-          myVaultPhotos.push(dataUrl);
+          const compressedDataUrl = await compressImageFile(input.files[0], 800, 0.7);
+          myVaultPhotos.push(compressedDataUrl);
           await saveVaultPhotosToCloud();
           renderVaultGrid();
           alert("Photo added to your private vault!");
         } catch (e) {
-          alert("Error reading file: " + e.message);
+          alert("Error uploading file: " + e.message);
         }
       }
     }
@@ -1413,12 +1592,22 @@
       } catch (err) { console.error(err); }
     }
 
-    // --- MY PROFILE, EDIT PROFILE & DELETE ACCOUNT ---
+    // --- MY PROFILE, EDIT ALL DETAILS & DELETE ACCOUNT ---
     function openEditProfileModal() {
       document.getElementById('editHandle').value = currentUserData.handle || '';
+      document.getElementById('editType').value = currentUserData.accountType || 'couple';
       document.getElementById('editAge').value = currentUserData.age || '';
+      document.getElementById('editOrientation').value = currentUserData.orientation || '';
       document.getElementById('editLocation').value = currentUserData.location || '';
+      document.getElementById('editExperience').value = currentUserData.experience || 'Newbie / Exploring';
+      document.getElementById('editAffiliation').value = currentUserData.affiliation || '';
       document.getElementById('editBio').value = currentUserData.bio || '';
+
+      const currentLookingFor = currentUserData.lookingFor || [];
+      document.querySelectorAll('input[name="editLookingFor"]').forEach(cb => {
+        cb.checked = currentLookingFor.includes(cb.value);
+      });
+
       document.getElementById('editProfileModal').classList.remove('hidden');
     }
 
@@ -1428,50 +1617,96 @@
 
     async function saveProfileChanges() {
       const handle = document.getElementById('editHandle').value.trim();
+      const accountType = document.getElementById('editType').value;
       const age = document.getElementById('editAge').value.trim();
+      const orientation = document.getElementById('editOrientation').value.trim();
       const location = document.getElementById('editLocation').value.trim();
+      const experience = document.getElementById('editExperience').value;
+      const affiliation = document.getElementById('editAffiliation').value.trim();
       const bio = document.getElementById('editBio').value.trim();
+      const photoFileInput = document.getElementById('editPhotoFile');
+
+      const lookingFor = [];
+      document.querySelectorAll('input[name="editLookingFor"]:checked').forEach(cb => lookingFor.push(cb.value));
+
+      let photoDataUrl = currentUserData.photoUrl || "";
+      if (photoFileInput.files && photoFileInput.files[0]) {
+        try {
+          photoDataUrl = await compressImageFile(photoFileInput.files[0], 600, 0.6);
+        } catch (e) {
+          console.error("Error compressing edit photo:", e);
+        }
+      }
 
       try {
-        await db.collection("users").doc(auth.currentUser.uid).update({
+        const updatedFields = {
           handle: handle,
+          accountType: accountType,
           age: age,
+          orientation: orientation,
           location: location,
-          bio: bio
-        });
-        currentUserData.handle = handle;
-        currentUserData.age = age;
-        currentUserData.location = location;
-        currentUserData.bio = bio;
+          experience: experience,
+          affiliation: affiliation,
+          bio: bio,
+          lookingFor: lookingFor,
+          photoUrl: photoDataUrl
+        };
+
+        await db.collection("users").doc(auth.currentUser.uid).update(updatedFields);
+
+        Object.assign(currentUserData, updatedFields);
 
         document.getElementById('navUserHandle').innerText = handle;
         renderMyProfile();
         closeEditProfileModal();
-        alert("Profile updated successfully!");
+        alert("All profile changes saved successfully!");
       } catch (err) { alert("Error updating profile: " + err.message); }
     }
 
     async function renderMyProfile() {
       const container = document.getElementById('myProfileContainer');
+      const img = currentUserData.photoUrl ? 
+        `<img src="${currentUserData.photoUrl}" class="w-20 h-20 rounded-2xl object-cover border border-slate-700 shadow-lg">` : 
+        `<div class="w-20 h-20 rounded-2xl bg-slate-950 flex items-center justify-center text-3xl border border-slate-800">📸</div>`;
+
       container.innerHTML = `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 text-left shadow-xl">
-          <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-            <div>
-              <h2 class="text-lg font-bold text-white">${currentUserData.handle}</h2>
-              <p class="text-xs text-rose-400 font-semibold capitalize">${currentUserData.accountType} • ${currentUserData.location}</p>
+          <div class="flex justify-between items-start border-b border-slate-800 pb-4">
+            <div class="flex space-x-3 items-center">
+              ${img}
+              <div>
+                <h2 class="text-lg font-bold text-white">${currentUserData.handle}</h2>
+                <p class="text-xs text-rose-400 font-semibold capitalize">${currentUserData.accountType} • ${currentUserData.location}</p>
+                <p class="text-[10px] text-slate-400">Age: ${currentUserData.age || 'N/A'}</p>
+              </div>
             </div>
             <div class="text-right">
               <span class="text-amber-400 font-bold text-sm">⭐ ${(currentUserData.rating || 5.0).toFixed(1)}</span>
               <p class="text-[9px] text-slate-500">Community Rating</p>
             </div>
           </div>
+
+          <div class="grid grid-cols-2 gap-2 text-[10px] bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+            <div><span class="text-slate-500">Orientation:</span> <span class="text-slate-200 font-semibold">${currentUserData.orientation || 'N/A'}</span></div>
+            <div><span class="text-slate-500">Experience:</span> <span class="text-slate-200 font-semibold">${currentUserData.experience || 'N/A'}</span></div>
+            <div class="col-span-2"><span class="text-slate-500">Affiliation:</span> <span class="text-slate-200 font-semibold">${currentUserData.affiliation || 'N/A'}</span></div>
+          </div>
+
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
             <span class="text-[10px] text-slate-500 uppercase font-bold">About Me / Us</span>
             <p class="text-slate-300 italic">${currentUserData.bio || 'No description provided.'}</p>
           </div>
-          <div class="flex space-x-2">
+
+          <div class="space-y-1">
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Looking For</span>
+            <div class="flex flex-wrap gap-1">
+              ${(currentUserData.lookingFor || []).map(i => `<span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded">${i}</span>`).join('')}
+            </div>
+          </div>
+
+          <div class="flex space-x-2 pt-2">
             <button onclick="openEditProfileModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
-              Edit My Profile ✏️
+              Edit All Profile Details ✏️
             </button>
             <button onclick="deleteAccount()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 font-bold px-4 py-2.5 rounded-xl text-xs transition">
               Delete Profile
