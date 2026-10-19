@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sway — Where discretion meets connection</title>
 
   <meta name="theme-color" content="#020617">
@@ -28,7 +28,6 @@
       appId: "1:403486835363:web:f482ddb648961a4f8d7516"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
@@ -53,9 +52,12 @@
       user-select: none;
     }
     img { pointer-events: none; }
+    /* Hide scrollbars for clean tab bar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col items-center justify-start antialiased selection:bg-rose-500 selection:text-white transition-all duration-300">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col items-center justify-start antialiased selection:bg-rose-500 selection:text-white pb-12">
 
   <!-- ==================== FLOWCHART ONBOARDING GATE ==================== -->
   <div id="authGateModal" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4 overflow-y-auto">
@@ -244,16 +246,17 @@
   <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
   <main class="w-full max-w-2xl px-4 py-4 mb-20 flex-1">
 
-    <nav class="flex border-b border-slate-800 mb-6 text-xs sm:text-sm font-semibold text-center overflow-x-auto">
-      <button onclick="switchTab('discover')" id="tabDiscover" class="flex-1 min-w-[70px] py-3 text-rose-500 border-b-2 border-rose-500 transition">Discover</button>
-      <button onclick="switchTab('feed')" id="tabFeed" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">Feed</button>
-      <button onclick="switchTab('events')" id="tabEvents" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">Events</button>
-      <button onclick="switchTab('messages')" id="tabMessages" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition relative">Messages</button>
-      <button onclick="switchTab('invites')" id="tabInvites" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">Invites</button>
-      <button onclick="switchTab('profile')" id="tabProfile" class="flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition">My Profile</button>
+    <!-- SUB-NAVIGATION BAR -->
+    <nav class="flex border-b border-slate-800 mb-6 text-xs sm:text-sm font-semibold text-center overflow-x-auto no-scrollbar">
+      <button onclick="switchTab('discover')" id="tabDiscover" class="flex-1 min-w-[75px] py-3 text-rose-500 border-b-2 border-rose-500 transition">Discover</button>
+      <button onclick="switchTab('feed')" id="tabFeed" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">Feed</button>
+      <button onclick="switchTab('events')" id="tabEvents" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">Events</button>
+      <button onclick="switchTab('messages')" id="tabMessages" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition relative">Messages</button>
+      <button onclick="switchTab('invites')" id="tabInvites" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">Invites</button>
+      <button onclick="switchTab('profile')" id="tabProfile" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">My Profile</button>
     </nav>
 
-    <!-- DISCOVERY DECK -->
+    <!-- 1. DISCOVERY DECK -->
     <section id="contentDiscover" class="space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
         <div class="relative h-72 sm:h-80 bg-slate-950 flex items-center justify-center overflow-hidden select-none">
@@ -263,25 +266,116 @@
           <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-2 z-10">
             <span class="text-3xl">🔒</span>
             <p class="font-bold text-sm text-slate-200">Private Vault Protected</p>
-            <button onclick="alert('Vault permission request sent!')" class="mt-2 bg-rose-600 hover:bg-rose-600 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-lg transition">Request Vault Access</button>
+            <p class="text-[11px] text-slate-400 max-w-xs">Verified photos are encrypted. Request access to exchange vault keys.</p>
+            <button onclick="alert('Vault permission request sent!')" class="mt-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-rose-900/40 transition">Request Vault Access</button>
           </div>
         </div>
 
         <div class="p-5 space-y-3">
-          <h2 class="text-xl font-bold text-white">Sofia & David <span class="text-rose-400 font-normal text-base">(31 / 34)</span></h2>
-          <p class="text-xs text-rose-400 font-semibold">Couple (M/F) • Manila, PH</p>
+          <div class="flex justify-between items-start">
+            <div>
+              <h2 class="text-xl font-bold text-white">Sofia & David <span class="text-rose-400 font-normal text-base">(31 / 34)</span></h2>
+              <p class="text-xs text-rose-400 font-semibold mt-0.5">Couple (M/F) • Manila, PH</p>
+            </div>
+            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2.5 py-1 rounded-full font-semibold">Active Now</span>
+          </div>
+
+          <p class="text-xs text-slate-300 leading-relaxed">Discreet Manila couple who love high-end social dinners, boutique beach resorts, and open-minded discussions. Looking for like-minded couples and unicorns for soft/full swap experiences.</p>
+
+          <div class="flex flex-wrap gap-1.5 pt-2">
+            <span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">Soft Swap</span>
+            <span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">Full Swap</span>
+            <span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">Unicorn</span>
+            <span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">BGC / Makati</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Placeholders & Profile Tab -->
-    <section id="contentFeed" class="hidden text-xs text-slate-400 text-center py-10">Community Feed</section>
-    <section id="contentEvents" class="hidden text-xs text-slate-400 text-center py-10">Events Hub</section>
-    <section id="contentMessages" class="hidden text-xs text-slate-400 text-center py-10">Direct Messages</section>
-    <section id="contentInvites" class="hidden text-xs text-slate-400 text-center py-10">Invite Manager</section>
+    <!-- 2. COMMUNITY FEED -->
+    <section id="contentFeed" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-xl">
+        <textarea id="feedPostInput" rows="2" placeholder="Share a discreet thought or announcement with the community..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-rose-500 resize-none"></textarea>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] text-slate-500">🔒 Posts are visible to verified Sway members only.</span>
+          <button onclick="publishFeedPost()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-lg shadow-rose-900/30">Post Update</button>
+        </div>
+      </div>
+
+      <div id="feedPostsContainer" class="space-y-3">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 shadow-md">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-rose-400">@AlexAndElena</span>
+            <span class="text-[10px] text-slate-500">2 hours ago</span>
+          </div>
+          <p class="text-xs text-slate-300">Anyone attending the private lounge gathering in BGC this weekend? Let us know if you want to grab drinks beforehand! 🥂</p>
+          <div class="pt-2 flex items-center space-x-4 text-[11px] text-slate-400 border-t border-slate-800/60">
+            <button onclick="this.classList.toggle('text-rose-500')" class="flex items-center space-x-1 hover:text-rose-400"><span>❤️</span> <span>12</span></button>
+            <button onclick="alert('Opening chat...')" class="flex items-center space-x-1 hover:text-slate-200"><span>💬</span> <span>4 replies</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. EVENTS HUB -->
+    <section id="contentEvents" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-xl">
+        <div class="flex justify-between items-start">
+          <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] px-2.5 py-1 rounded-full font-bold">UPCOMING EVENT</span>
+          <span class="text-xs font-mono text-slate-400">Oct 24, 2026</span>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">BGC Secret Rooftop Cocktail Social</h3>
+          <p class="text-xs text-slate-400 mt-1">An exclusive, invite-only evening for local couples & verified singles. Secret venue address sent 2 hours before start.</p>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+          <span class="text-xs text-emerald-400 font-semibold">18 / 25 Confirmed</span>
+          <button onclick="alert('RSVP Request Sent to Host!')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition">Request RSVP</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. DIRECT MESSAGES -->
+    <section id="contentMessages" class="hidden space-y-3">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Encrypted Conversations</h3>
+        <div class="divide-y divide-slate-800/60">
+          <div onclick="alert('Opening conversation with @SofiaAndDavid')" class="py-3 flex items-center space-x-3 cursor-pointer hover:bg-slate-800/40 px-2 rounded-xl transition">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 to-pink-600 flex items-center justify-center font-bold text-white text-xs">SD</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-white">@SofiaAndDavid</span>
+                <span class="text-[10px] text-slate-500">10:42 AM</span>
+              </div>
+              <p class="text-xs text-slate-400 truncate">Hey! We saw your profile and loved your vibe...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. MEMBER INVITE MANAGER -->
+    <section id="contentInvites" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+        <div class="space-y-1">
+          <h3 class="text-base font-bold text-white">Invite Code Generator</h3>
+          <p class="text-xs text-slate-400">Generate single-use invite passes for vetted candidates in your personal network.</p>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 text-center">
+          <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Generated Pass Code</span>
+          <div id="generatedCodeDisplay" class="text-lg font-mono font-bold text-rose-400 tracking-widest">Click below to generate</div>
+          <button onclick="generateMemberInvite()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+            Generate New Single-Use Pass 🎫
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. MY PROFILE TAB -->
     <section id="contentProfile" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
-        Complete registration to view your cloud profile.
+      <div id="profileContentCard" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+        Loading live cloud profile...
       </div>
     </section>
 
@@ -302,6 +396,7 @@
 
   <!-- ==================== FIREBASE CLOUD BACKEND LOGIC ==================== -->
   <script>
+    // Step 1: Verify Invite Code in Firestore
     async function verifyInviteCode() {
       const code = document.getElementById("inviteCodeInput").value.trim().toUpperCase();
       if (!code) { alert("Please enter a valid invite code."); return; }
@@ -402,13 +497,28 @@
       }
     }
 
+    // Auth state listener: Keep user logged in across page reloads
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        document.getElementById("authGateModal").classList.add("hidden");
+        try {
+          const doc = await db.collection("users").doc(user.uid).get();
+          if (doc.exists) {
+            const data = doc.data();
+            document.getElementById("navUserHandle").innerText = data.handle || "@Member";
+            renderUserProfile(data);
+          }
+        } catch (e) { console.error("Error loading user profile:", e); }
+      }
+    });
+
     function renderUserProfile(data) {
       const profileSection = document.getElementById("contentProfile");
       profileSection.innerHTML = `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
           <div class="flex items-center space-x-4 border-b border-slate-800 pb-4">
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-rose-600 to-pink-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
-              ${data.handle.charAt(1) ? data.handle.charAt(1).toUpperCase() : 'S'}
+              ${data.handle && data.handle.charAt(1) ? data.handle.charAt(1).toUpperCase() : 'S'}
             </div>
             <div>
               <h2 class="text-lg font-bold text-white">${data.handle}</h2>
@@ -428,11 +538,51 @@
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
             <span class="text-slate-500 block text-[10px] uppercase">Looking For</span>
             <div class="flex flex-wrap gap-1.5 pt-1">
-              ${data.lookingFor.map(item => `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-md text-[10px] font-medium">${item}</span>`).join('')}
+              ${(data.lookingFor || []).map(item => `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-md text-[10px] font-medium">${item}</span>`).join('')}
             </div>
+          </div>
+          <button onclick="auth.signOut().then(() => location.reload())" class="w-full bg-slate-950 hover:bg-slate-800 text-rose-400 border border-slate-800 font-bold py-2.5 rounded-xl text-xs transition">
+            Log Out of Cloud Account
+          </button>
+        </div>
+      `;
+    }
+
+    async function generateMemberInvite() {
+      const newCode = "SWY-" + Math.floor(1000 + Math.random() * 9000) + "-X" + Math.floor(1 + Math.random() * 9);
+      try {
+        await db.collection("invites").doc(newCode).set({
+          used: false,
+          createdBy: auth.currentUser ? auth.currentUser.uid : 'admin',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById("generatedCodeDisplay").innerText = newCode;
+        alert("Invite Pass Created! Code: " + newCode);
+      } catch (err) {
+        console.error("Invite generation error:", err);
+        document.getElementById("generatedCodeDisplay").innerText = newCode;
+      }
+    }
+
+    function publishFeedPost() {
+      const text = document.getElementById("feedPostInput").value.trim();
+      if (!text) return;
+      const handle = document.getElementById("navUserHandle").innerText;
+      
+      const postHtml = `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 shadow-md">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-rose-400">${handle}</span>
+            <span class="text-[10px] text-slate-500">Just now</span>
+          </div>
+          <p class="text-xs text-slate-300">${text}</p>
+          <div class="pt-2 flex items-center space-x-4 text-[11px] text-slate-400 border-t border-slate-800/60">
+            <button onclick="this.classList.toggle('text-rose-500')" class="flex items-center space-x-1 hover:text-rose-400"><span>❤️</span> <span>0</span></button>
           </div>
         </div>
       `;
+      document.getElementById("feedPostsContainer").insertAdjacentHTML('afterbegin', postHtml);
+      document.getElementById("feedPostInput").value = "";
     }
 
     function switchTab(tabName) {
@@ -440,11 +590,11 @@
         const content = document.getElementById('content' + capitalize(t));
         const btn = document.getElementById('tab' + capitalize(t));
         if (content) content.classList.add('hidden');
-        if (btn) btn.className = 'flex-1 min-w-[70px] py-3 text-slate-400 hover:text-slate-200 transition';
+        if (btn) btn.className = 'flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition';
       });
 
       document.getElementById('content' + capitalize(tabName)).classList.remove('hidden');
-      document.getElementById('tab' + capitalize(tabName)).className = 'flex-1 min-w-[70px] py-3 text-rose-500 border-b-2 border-rose-500 font-bold transition';
+      document.getElementById('tab' + capitalize(tabName)).className = 'flex-1 min-w-[75px] py-3 text-rose-500 border-b-2 border-rose-500 font-bold transition';
     }
 
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
