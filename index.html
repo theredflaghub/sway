@@ -274,12 +274,16 @@
       </div>
     </section>
 
-    <!-- Placeholders -->
+    <!-- Placeholders & Profile Tab -->
     <section id="contentFeed" class="hidden text-xs text-slate-400 text-center py-10">Community Feed</section>
     <section id="contentEvents" class="hidden text-xs text-slate-400 text-center py-10">Events Hub</section>
     <section id="contentMessages" class="hidden text-xs text-slate-400 text-center py-10">Direct Messages</section>
     <section id="contentInvites" class="hidden text-xs text-slate-400 text-center py-10">Invite Manager</section>
-    <section id="contentProfile" class="hidden text-xs text-slate-400 text-center py-10">Profile Settings</section>
+    <section id="contentProfile" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+        Complete registration to view your cloud profile.
+      </div>
+    </section>
 
   </main>
 
@@ -298,7 +302,6 @@
 
   <!-- ==================== FIREBASE CLOUD BACKEND LOGIC ==================== -->
   <script>
-    // Step 1: Verify Invite Code in Firestore
     async function verifyInviteCode() {
       const code = document.getElementById("inviteCodeInput").value.trim().toUpperCase();
       if (!code) { alert("Please enter a valid invite code."); return; }
@@ -334,7 +337,6 @@
       else { box.classList.add("hidden"); }
     }
 
-    // Step 2: Form validation & proceed
     function proceedToPhotoUpload() {
       const handle = document.getElementById("regHandle").value.trim();
       const agreed = document.getElementById("agreeEula").checked;
@@ -345,13 +347,11 @@
       document.getElementById("stepPhoto").classList.remove("hidden");
     }
 
-    // Step 3: Photo upload proceed
     function proceedToEmailVerification() {
       document.getElementById("stepPhoto").classList.add("hidden");
       document.getElementById("stepEmail").classList.remove("hidden");
     }
 
-    // Step 4: Write User to Firebase Auth & Firestore
     async function completeCloudRegistration() {
       const email = document.getElementById("regEmail").value.trim();
       const password = document.getElementById("regPassword").value.trim();
@@ -377,7 +377,7 @@
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const uid = userCredential.user.uid;
 
-        await db.collection("users").doc(uid).set({
+        const userData = {
           handle: handle,
           accountType: type,
           coupleOrientation: type === "couple" ? coupleOrientation : "N/A",
@@ -387,15 +387,52 @@
           affiliation: affiliation,
           lookingFor: lookingFor,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+
+        await db.collection("users").doc(uid).set(userData);
 
         document.getElementById("navUserHandle").innerText = handle;
+        renderUserProfile(userData);
+
         document.getElementById("authGateModal").classList.add("hidden");
         alert("Cloud account created successfully! Welcome to Sway.");
       } catch (error) {
         console.error("Registration error:", error);
         alert("Registration Error: " + error.message);
       }
+    }
+
+    function renderUserProfile(data) {
+      const profileSection = document.getElementById("contentProfile");
+      profileSection.innerHTML = `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+          <div class="flex items-center space-x-4 border-b border-slate-800 pb-4">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-rose-600 to-pink-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+              ${data.handle.charAt(1) ? data.handle.charAt(1).toUpperCase() : 'S'}
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-white">${data.handle}</h2>
+              <p class="text-xs text-rose-400 font-semibold capitalize">${data.accountType} • ${data.location}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="text-slate-500 block text-[10px] uppercase">Age(s)</span>
+              <span class="text-slate-200 font-bold">${data.age || 'N/A'}</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="text-slate-500 block text-[10px] uppercase">Experience</span>
+              <span class="text-slate-200 font-bold">${data.experience}</span>
+            </div>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
+            <span class="text-slate-500 block text-[10px] uppercase">Looking For</span>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              ${data.lookingFor.map(item => `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-md text-[10px] font-medium">${item}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function switchTab(tabName) {
