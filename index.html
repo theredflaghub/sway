@@ -52,7 +52,6 @@
       user-select: none;
     }
     img { pointer-events: none; }
-    /* Hide scrollbars for clean tab bar */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -74,23 +73,48 @@
         <p class="text-xs text-rose-400 font-medium">Where discretion meets connection</p>
       </div>
 
-      <!-- STEP 1: INSERT INVITE CODE -->
+      <!-- STEP 1: INSERT INVITE CODE (REGISTRATION ONLY) -->
       <div id="stepInvite" class="space-y-4">
         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">Step 1: Enter Private Invite Code</label>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">New Member: Enter Private Invite Code</label>
           <input type="text" id="inviteCodeInput" placeholder="e.g. SWY-1234-X1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center font-mono tracking-widest text-sm focus:outline-none focus:border-rose-500 uppercase">
-          <p class="text-[10px] text-slate-500 text-center">Membership requires an active single-use code from a verified member.</p>
+          <p class="text-[10px] text-slate-500 text-center">Registration requires an active single-use code from a verified member.</p>
         </div>
 
         <button onclick="verifyInviteCode()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-          Verify Invite Code →
+          Verify Invite Code & Register →
         </button>
+
+        <div class="text-center pt-2 border-t border-slate-800/80">
+          <button onclick="toggleSignInView()" class="text-xs text-slate-400 hover:text-rose-400 transition">
+            Already a member? <span class="text-rose-400 font-bold underline">Sign In</span>
+          </button>
+        </div>
       </div>
 
-      <!-- STEP 2: DETAILED REGISTRATION PROFILE -->
+      <!-- DIRECT SIGN-IN VIEW FOR EXISTING MEMBERS -->
+      <div id="stepLogin" class="hidden space-y-4">
+        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">Member Login</label>
+          <input type="email" id="loginEmail" placeholder="e.g. member@proton.me" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
+          <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
+        </div>
+
+        <button onclick="loginExistingUser()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
+          Sign In 🔓
+        </button>
+
+        <div class="text-center pt-2 border-t border-slate-800/80">
+          <button onclick="toggleSignInView()" class="text-xs text-slate-400 hover:text-rose-400 transition">
+            Need to register? <span class="text-rose-400 font-bold underline">Use Invite Code</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: DETAILED REGISTRATION PROFILE + INTRO TEXTBOX -->
       <div id="stepRegister" class="hidden space-y-3 text-xs max-h-[70vh] overflow-y-auto pr-1">
         <div class="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl text-emerald-300 text-[11px] text-center font-medium">
-          ✓ Code Verified. Complete your confidential profile.
+          ✓ Invite Code Verified. Complete your confidential profile.
         </div>
 
         <div>
@@ -140,6 +164,12 @@
           </div>
         </div>
 
+        <!-- NEW: INTRODUCTION / ABOUT ME TEXTBOX -->
+        <div>
+          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Introduce Yourself / About You</label>
+          <textarea id="regBio" rows="3" placeholder="Tell the community about your interests, vibe, boundaries, or what makes your profile unique..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500 resize-none text-xs"></textarea>
+        </div>
+
         <div>
           <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Community Group Affiliation</label>
           <input type="text" id="regAffiliation" placeholder="e.g. Local Private Circle / Previous Club" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500">
@@ -154,7 +184,6 @@
             <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Bull" class="accent-rose-500"> <span>Bull</span></label>
             <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Watcher" class="accent-rose-500"> <span>Watcher</span></label>
             <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Social Friends" class="accent-rose-500"> <span>Community Friend</span></label>
-            <label class="col-span-2 flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Not Sure / Exploring" class="accent-rose-500"> <span>Not Sure / Exploring Options</span></label>
           </div>
         </div>
 
@@ -396,7 +425,13 @@
 
   <!-- ==================== FIREBASE CLOUD BACKEND LOGIC ==================== -->
   <script>
-    // Step 1: Verify Invite Code in Firestore
+    // Toggle between Invite Pass verification and Existing Member Sign-In
+    function toggleSignInView() {
+      document.getElementById("stepInvite").classList.toggle("hidden");
+      document.getElementById("stepLogin").classList.toggle("hidden");
+    }
+
+    // Step 1: Verify Invite Code in Firestore (REGISTRATION ONLY)
     async function verifyInviteCode() {
       const code = document.getElementById("inviteCodeInput").value.trim().toUpperCase();
       if (!code) { alert("Please enter a valid invite code."); return; }
@@ -425,6 +460,20 @@
       }
     }
 
+    // Direct Login for existing members
+    async function loginExistingUser() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      if (!email || !password) { alert("Please enter email and password."); return; }
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        document.getElementById("authGateModal").classList.add("hidden");
+      } catch (err) {
+        alert("Login failed: " + err.message);
+      }
+    }
+
     function toggleCoupleOrientation() {
       const type = document.getElementById("regType").value;
       const box = document.getElementById("coupleOrientationBox");
@@ -447,6 +496,7 @@
       document.getElementById("stepEmail").classList.remove("hidden");
     }
 
+    // Complete cloud registration + Save Bio text
     async function completeCloudRegistration() {
       const email = document.getElementById("regEmail").value.trim();
       const password = document.getElementById("regPassword").value.trim();
@@ -456,6 +506,7 @@
       const age = document.getElementById("regAge").value;
       const location = document.getElementById("regLocation").value;
       const experience = document.getElementById("regExperience").value;
+      const bio = document.getElementById("regBio").value.trim();
       const affiliation = document.getElementById("regAffiliation").value;
 
       const lookingFor = [];
@@ -479,6 +530,7 @@
           age: age,
           location: location,
           experience: experience,
+          bio: bio || "No description provided.",
           affiliation: affiliation,
           lookingFor: lookingFor,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -512,6 +564,7 @@
       }
     });
 
+    // Display user profile card with bio
     function renderUserProfile(data) {
       const profileSection = document.getElementById("contentProfile");
       profileSection.innerHTML = `
@@ -524,6 +577,10 @@
               <h2 class="text-lg font-bold text-white">${data.handle}</h2>
               <p class="text-xs text-rose-400 font-semibold capitalize">${data.accountType} • ${data.location}</p>
             </div>
+          </div>
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1 text-xs">
+            <span class="text-slate-500 block text-[10px] uppercase font-bold tracking-wider">About Us / Introduction</span>
+            <p class="text-slate-300 leading-relaxed italic">${data.bio || 'No introduction added.'}</p>
           </div>
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
