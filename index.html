@@ -1,24 +1,113 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sway — Where discretion meets connection</title>
+  <title>Sway - Exclusive Connections</title>
 
-  <meta name="theme-color" content="#020617">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="https://via.placeholder.com/192/f43f5e/ffffff?text=SWAY">
-
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- ==================== FIREBASE SDKs ==================== -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
   <script>
-    // ==================== LIVE FIREBASE CONFIGURATION ====================
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              900: '#881337',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-nav {
+      background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Card Drag Animation transitions */
+    .swipe-card {
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      will-change: transform, opacity;
+    }
+
+    .swipe-card.dragging {
+      transition: none;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(244, 63, 94, 0.4);
+      border-radius: 4px;
+    }
+  </style>
+
+  <!-- Firebase Modular Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { 
+      getAuth, 
+      signInAnonymously, 
+      signInWithCustomToken, 
+      onAuthStateChanged,
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      updateDoc, 
+      collection, 
+      addDoc, 
+      onSnapshot,
+      query,
+      where,
+      getDocs 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // User's Sway Production Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyD9_0k0HZ3RSL5GGCMJl1fTaiqkoUstPbQ",
       authDomain: "swayproduction.firebaseapp.com",
@@ -28,693 +117,735 @@
       appId: "1:403486835363:web:f482ddb648961a4f8d7516"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+    // App Identifier Scope for Rules Compliance
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'sway-app';
 
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 500: '#f43f5e', 600: '#e11d48', 700: '#be123c' }
-          }
+    // Initialize Firebase Services
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Make Firebase services available to window global scope for UI Handlers
+    window.swayApp = {
+      app,
+      auth,
+      db,
+      appId,
+      currentUser: null,
+      currentProfile: null,
+      deckProfiles: [],
+      currentIndex: 0,
+      activeTab: 'discover'
+    };
+
+    // --- MOCK / INITIAL MEMBERS DATA (Used to populate if Firestore is empty) ---
+    const INITIAL_MEMBERS = [
+      {
+        id: "mem_1",
+        displayName: "Sienna Vance",
+        age: 26,
+        location: "Manila, PH",
+        bio: "Architect & designer. Obsessed with minimalist art, espresso, and roof deck lounge sets.",
+        photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+        vaultCount: 4,
+        vaultLocked: true,
+        interests: ["Architecture", "Espresso", "Art Galleries"]
+      },
+      {
+        id: "mem_2",
+        displayName: "Marcus Cole",
+        age: 29,
+        location: "BGC, Taguig",
+        bio: "Tech founder & night drive enthusiast. Looking for someone genuine to explore underground jazz bars.",
+        photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+        vaultCount: 6,
+        vaultLocked: true,
+        interests: ["Jazz", "Tech", "Sailing"]
+      },
+      {
+        id: "mem_3",
+        displayName: "Elena Rostova",
+        age: 24,
+        location: "Makati City",
+        bio: "Creative director. Sunset cocktails & deep conversation. Pass code recipient.",
+        photoUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+        vaultCount: 3,
+        vaultLocked: true,
+        interests: ["Fashion", "Photography", "Travel"]
+      },
+      {
+        id: "mem_4",
+        displayName: "Julian Mercer",
+        age: 31,
+        location: "Pasig, Metro Manila",
+        bio: "Venture capitalist. Lover of fine dining, high-altitude hikes, and vintage watches.",
+        photoUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80",
+        vaultCount: 5,
+        vaultLocked: true,
+        interests: ["Investments", "Wine", "Hikes"]
+      }
+    ];
+
+    // --- AUTHENTICATION INIT ---
+    async function initAuth() {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
         }
+      } catch (err) {
+        console.warn("Auth token fallback to anonymous:", err);
+        await signInAnonymously(auth);
       }
     }
-  </script>
 
-  <style>
-    body {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        window.swayApp.currentUser = user;
+        console.log("Authenticated User ID:", user.uid);
+        
+        // Check if user has completed profile stored in Firestore
+        await loadUserProfile(user.uid);
+        await loadDeckProfiles();
+      }
+    });
+
+    // Helper functions for Firestore collections
+    function getPublicCollection(collName) {
+      return collection(db, 'artifacts', appId, 'public', 'data', collName);
     }
-    img { pointer-events: none; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
+    function getPublicDoc(collName, docId) {
+      return doc(db, 'artifacts', appId, 'public', 'data', collName, docId);
+    }
+
+    async function loadUserProfile(uid) {
+      try {
+        const userDocRef = getPublicDoc('users', uid);
+        const snap = await getDoc(userDocRef);
+        if (snap.exists()) {
+          window.swayApp.currentProfile = snap.data();
+          hideAuthGate();
+        } else {
+          // Show auth modal step
+          showAuthGate();
+        }
+      } catch (e) {
+        console.error("Error loading user profile:", e);
+        showAuthGate();
+      }
+    }
+
+    async function loadDeckProfiles() {
+      try {
+        const usersColl = getPublicCollection('users');
+        const snap = await getDocs(usersColl);
+        let list = [];
+        
+        snap.forEach(d => {
+          if (d.id !== window.swayApp.currentUser?.uid) {
+            list.push({ id: d.id, ...d.data() });
+          }
+        });
+
+        // If list is empty or small, mix in initial members for immediate play
+        if (list.length < 3) {
+          INITIAL_MEMBERS.forEach(m => {
+            if (!list.some(existing => existing.id === m.id)) {
+              list.push(m);
+            }
+          });
+        }
+
+        window.swayApp.deckProfiles = list;
+        window.swayApp.currentIndex = 0;
+        renderCurrentCard();
+      } catch (e) {
+        console.error("Error loading deck:", e);
+        window.swayApp.deckProfiles = INITIAL_MEMBERS;
+        renderCurrentCard();
+      }
+    }
+
+    // Expose Auth functions to window
+    window.swayAuth = {
+      registerMember: async (displayName, passCode, bio, photoUrl) => {
+        if (!window.swayApp.currentUser) return;
+        const uid = window.swayApp.currentUser.uid;
+        const profileData = {
+          id: uid,
+          displayName: displayName || "Sway Member",
+          passCode: passCode || "VIP-MEMBER",
+          bio: bio || "New exclusive Sway community member.",
+          photoUrl: photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+          location: "Metro Manila",
+          age: 25,
+          vaultCount: 3,
+          createdAt: new Date().toISOString()
+        };
+
+        await setDoc(getPublicDoc('users', uid), profileData);
+        window.swayApp.currentProfile = profileData;
+        hideAuthGate();
+        showToast("Welcome to Sway! Account created.");
+        loadDeckProfiles();
+      },
+
+      signInWithPassCode: async (passCode) => {
+        if (!passCode) {
+          showToast("Please enter your Member Pass Code or Email");
+          return;
+        }
+        showToast("Access Granted. Loading your account...");
+        // Fast mock sign in for Demo / Firestore session
+        const uid = window.swayApp.currentUser?.uid || "user_demo";
+        const profileData = {
+          id: uid,
+          displayName: "Verified Member",
+          passCode: passCode,
+          bio: "Welcome back to Sway.",
+          photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+          location: "Manila, PH",
+          age: 28,
+          vaultCount: 5
+        };
+        await setDoc(getPublicDoc('users', uid), profileData);
+        window.swayApp.currentProfile = profileData;
+        hideAuthGate();
+        loadDeckProfiles();
+      }
+    };
+
+    // Initialize Auth setup
+    initAuth();
+  </script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col items-center justify-start antialiased selection:bg-rose-500 selection:text-white pb-12">
+<body class="h-full w-full flex flex-col justify-between items-center overflow-hidden bg-slate-950 text-slate-100">
 
-  <!-- ==================== FLOWCHART ONBOARDING GATE ==================== -->
-  <div id="authGateModal" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4 overflow-y-auto">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-auto">
-      
-      <!-- Logo & Tagline -->
-      <div class="flex flex-col items-center space-y-2 text-center">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-xl shadow-rose-900/50 border border-rose-400/30">
-          <svg class="w-8 h-8 text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18.2 9.5a5.5 5.5 0 00-9.7-3.1c-1.1 1.3-1.3 3.1-.4 4.6 1 1.7 3.3 2.5 4.3 4.2 1 1.5.8 3.5-.6 4.8a5.5 5.5 0 01-8.2-7.1"></path>
-          </svg>
-        </div>
-        <h1 class="text-2xl font-black tracking-wider uppercase bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent">Sway</h1>
-        <p class="text-xs text-rose-400 font-medium">Where discretion meets connection</p>
+  <!-- ================= TOP HEADER (CLEAN - ADMIN BUTTON REMOVED) ================= -->
+  <header class="w-full max-w-md px-5 py-4 flex items-center justify-between z-30 shrink-0">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-600 to-rose-400 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-rose-900/30">
+        S
       </div>
-
-      <!-- STEP 1: INSERT INVITE CODE (REGISTRATION ONLY) -->
-      <div id="stepInvite" class="space-y-4">
-        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">New Member: Enter Private Invite Code</label>
-          <input type="text" id="inviteCodeInput" placeholder="e.g. SWY-1234-X1" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center font-mono tracking-widest text-sm focus:outline-none focus:border-rose-500 uppercase">
-          <p class="text-[10px] text-slate-500 text-center">Registration requires an active single-use code from a verified member.</p>
-        </div>
-
-        <button onclick="verifyInviteCode()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-          Verify Invite Code & Register →
-        </button>
-
-        <div class="text-center pt-2 border-t border-slate-800/80">
-          <button onclick="toggleSignInView()" class="text-xs text-slate-400 hover:text-rose-400 transition">
-            Already a member? <span class="text-rose-400 font-bold underline">Sign In</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- DIRECT SIGN-IN VIEW FOR EXISTING MEMBERS -->
-      <div id="stepLogin" class="hidden space-y-4">
-        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase tracking-wider text-center">Member Login</label>
-          <input type="email" id="loginEmail" placeholder="e.g. member@proton.me" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
-          <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
-        </div>
-
-        <button onclick="loginExistingUser()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-          Sign In 🔓
-        </button>
-
-        <div class="text-center pt-2 border-t border-slate-800/80">
-          <button onclick="toggleSignInView()" class="text-xs text-slate-400 hover:text-rose-400 transition">
-            Need to register? <span class="text-rose-400 font-bold underline">Use Invite Code</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- STEP 2: DETAILED REGISTRATION PROFILE + INTRO TEXTBOX -->
-      <div id="stepRegister" class="hidden space-y-3 text-xs max-h-[70vh] overflow-y-auto pr-1">
-        <div class="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl text-emerald-300 text-[11px] text-center font-medium">
-          ✓ Invite Code Verified. Complete your confidential profile.
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Desired Username / Handle</label>
-          <input type="text" id="regHandle" placeholder="e.g. @AlexAndElena" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500">
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Account Type</label>
-            <select id="regType" onchange="toggleCoupleOrientation()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-              <option value="couple">Couple</option>
-              <option value="unicorn">Unicorn (Single F)</option>
-              <option value="bull">Bull (Single M)</option>
-              <option value="watcher">Watcher / Single</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Age(s)</label>
-            <input type="text" id="regAge" placeholder="e.g. 32 / 30" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-          </div>
-        </div>
-
-        <div id="coupleOrientationBox">
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Couple Dynamic / Orientation</label>
-          <select id="regCoupleOrientation" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-            <option>M/F (Bi-Curious Female)</option>
-            <option>M/F (Bi-Curious Both)</option>
-            <option>M/F (Straight / Open)</option>
-            <option>M/M Couple</option>
-            <option>F/F Couple</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Location</label>
-            <input type="text" id="regLocation" placeholder="Manila, PH" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-          </div>
-          <div>
-            <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Experience Level</label>
-            <select id="regExperience" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-rose-500">
-              <option>Newbie / Exploring</option>
-              <option>With Experience</option>
-              <option>Community Veteran</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- INTRODUCTION / ABOUT ME TEXTBOX -->
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Introduce Yourself / About You</label>
-          <textarea id="regBio" rows="3" placeholder="Tell the community about your interests, vibe, boundaries, or what makes your profile unique..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500 resize-none text-xs"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1">Community Group Affiliation</label>
-          <input type="text" id="regAffiliation" placeholder="e.g. Local Private Circle / Previous Club" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-rose-500">
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold text-[10px] uppercase mb-1.5">What Are You Looking For?</label>
-          <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11px]">
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Soft Swap" class="accent-rose-500"> <span>Soft Swap</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Full Swap" class="accent-rose-500"> <span>Full Swap</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Unicorn" class="accent-rose-500"> <span>Unicorn</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Bull" class="accent-rose-500"> <span>Bull</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Watcher" class="accent-rose-500"> <span>Watcher</span></label>
-            <label class="flex items-center space-x-1.5 cursor-pointer"><input type="checkbox" name="lookingFor" value="Social Friends" class="accent-rose-500"> <span>Community Friend</span></label>
-          </div>
-        </div>
-
-        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5 text-[11px] text-slate-300">
-          <p class="font-bold text-rose-400 uppercase text-[9px]">End User Discretion Agreement</p>
-          <p>Zero-leak policy strictly enforced. Screenshots, recordings, or sharing private event locations results in instant termination and liability.</p>
-          <label class="flex items-start space-x-2 pt-1 cursor-pointer">
-            <input type="checkbox" id="agreeEula" class="mt-0.5 rounded accent-rose-500">
-            <span class="text-white">I am 18+ and agree to all consent & zero-leak policies.</span>
-          </label>
-        </div>
-
-        <button onclick="proceedToPhotoUpload()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-          Continue to Vault Photo Upload →
-        </button>
-      </div>
-
-      <!-- STEP 3: PHOTO UPLOAD -->
-      <div id="stepPhoto" class="hidden space-y-4 text-center">
-        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
-          <span class="text-3xl">📸</span>
-          <h3 class="text-sm font-bold text-white">Private Vault Verification Photo</h3>
-          <p class="text-[11px] text-slate-400">Upload a discreet verification image for your encrypted vault. EXIF GPS data will be automatically stripped.</p>
-          <input type="file" id="photoFile" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-600 file:text-white hover:file:bg-rose-700 cursor-pointer">
-        </div>
-
-        <button onclick="proceedToEmailVerification()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-          Upload & Verify Email →
-        </button>
-      </div>
-
-      <!-- STEP 4: EMAIL VERIFICATION & PASSWORD CREATION -->
-      <div id="stepEmail" class="hidden space-y-4 text-center">
-        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
-          <span class="text-3xl">✉️</span>
-          <h3 class="text-sm font-bold text-white">Secure Email & Password</h3>
-          <p class="text-[11px] text-slate-400">Create your secure login credentials to protect your cloud account.</p>
-          <input type="email" id="regEmail" placeholder="e.g. member@proton.me" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
-          <input type="password" id="regPassword" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-center text-xs focus:outline-none focus:border-rose-500">
-        </div>
-
-        <button onclick="completeCloudRegistration()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-          Complete Cloud Registration 🔓
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-
-  <!-- ==================== ANTI-SNOOP OVERLAY ==================== -->
-  <div id="privacyBlurOverlay" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center space-y-3">
-    <div class="w-12 h-12 bg-rose-500/20 rounded-full flex items-center justify-center border border-rose-500/30">
-      <svg class="w-7 h-7 text-rose-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-    </div>
-    <h3 class="text-lg font-bold text-white">Sway Protected Mode</h3>
-    <p class="text-xs text-slate-400 max-w-xs">App content is hidden while out of focus to protect privacy.</p>
-  </div>
-
-
-  <!-- ==================== TOP NAVIGATION BAR ==================== -->
-  <header class="w-full max-w-2xl bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-800 px-4 py-3 flex items-center justify-between shadow-lg">
-    <div class="flex items-center space-x-2.5">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 via-pink-600 to-rose-400 flex items-center justify-center shadow-lg shadow-rose-900/40 border border-rose-400/30">
-        <svg class="w-5 h-5 text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18.2 9.5a5.5 5.5 0 00-9.7-3.1c-1.1 1.3-1.3 3.1-.4 4.6 1 1.7 3.3 2.5 4.3 4.2 1 1.5.8 3.5-.6 4.8a5.5 5.5 0 01-8.2-7.1"></path>
-        </svg>
-      </div>
-      <div>
-        <span class="font-black text-lg tracking-wider uppercase bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent block leading-none">Sway</span>
-        <span class="text-[9px] text-slate-400 font-medium tracking-tight block mt-0.5">Where discretion meets connection</span>
-      </div>
+      <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-rose-100 to-rose-400 bg-clip-text text-transparent">
+        SWAY
+      </span>
+      <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+        PRO
+      </span>
     </div>
 
-    <div class="flex items-center space-x-2">
-      <button onclick="openAdminModal()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs px-2.5 py-1.5 rounded-lg font-bold transition flex items-center space-x-1">
-        <span>👑</span> <span class="hidden sm:inline">Admin</span>
-      </button>
-      <button id="pwaInstallBtn" onclick="triggerPWAInstall()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center space-x-1">
-        <span>📲</span> <span class="hidden sm:inline">Install</span>
-      </button>
-      <div class="bg-slate-800 text-slate-300 border border-slate-700 text-xs px-2.5 py-1.5 rounded-lg font-mono">
-        <span id="navUserHandle">@Member</span>
+    <!-- Right Side Status Badge -->
+    <div class="flex items-center gap-2">
+      <div id="connectionStatus" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-xs font-medium text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Exclusive</span>
       </div>
     </div>
   </header>
 
 
-  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
-  <main class="w-full max-w-2xl px-4 py-4 mb-20 flex-1">
+  <!-- ================= MAIN CONTENT DISPLAY ================= -->
+  <main class="w-full max-w-md flex-1 relative flex flex-col justify-center items-center px-4 py-2 overflow-hidden">
+    
+    <!-- TINDER-STYLE DISCOVER TAB -->
+    <div id="tab-discover" class="tab-content w-full h-full flex flex-col justify-between items-center relative">
+      
+      <!-- Profile Card Container -->
+      <div class="w-full h-[calc(100%-80px)] relative flex items-center justify-center">
+        
+        <!-- Animated Active Card -->
+        <div id="swipeCard" class="swipe-card absolute inset-0 rounded-3xl overflow-hidden glass-card shadow-2xl flex flex-col border border-white/10 group">
+          
+          <!-- Primary Photo Section -->
+          <div class="relative w-full h-3/5 overflow-hidden bg-slate-900">
+            <img id="cardImage" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80" 
+                 alt="Member Photo" 
+                 class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                 onerror="this.src='https://placehold.co/800x1000/1e293b/f43f5e?text=Sway+Member'">
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+            
+            <!-- Vault Quick Access Badge on Photo -->
+            <button onclick="openVaultModal()" class="absolute top-4 right-4 px-3 py-1.5 rounded-full glass-card border border-rose-500/30 flex items-center gap-2 text-xs font-semibold text-rose-300 hover:bg-rose-950/40 transition">
+              <i class="fa-solid fa-lock text-rose-400 text-xs"></i>
+              <span>Vault Photos (<span id="cardVaultCount">4</span>)</span>
+            </button>
 
-    <!-- SUB-NAVIGATION BAR -->
-    <nav class="flex border-b border-slate-800 mb-6 text-xs sm:text-sm font-semibold text-center overflow-x-auto no-scrollbar">
-      <button onclick="switchTab('discover')" id="tabDiscover" class="flex-1 min-w-[75px] py-3 text-rose-500 border-b-2 border-rose-500 transition">Discover</button>
-      <button onclick="switchTab('feed')" id="tabFeed" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">Feed</button>
-      <button onclick="switchTab('events')" id="tabEvents" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">Events</button>
-      <button onclick="switchTab('messages')" id="tabMessages" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition relative">Messages</button>
-      <button onclick="switchTab('invites')" id="tabInvites" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">Invites</button>
-      <button onclick="switchTab('profile')" id="tabProfile" class="flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition">My Profile</button>
-    </nav>
-
-    <!-- 1. DYNAMIC DISCOVERY DECK -->
-    <section id="contentDiscover" class="space-y-4">
-      <div id="discoverDeckContainer" class="space-y-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
-          Loading member profiles...
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. COMMUNITY FEED -->
-    <section id="contentFeed" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-xl">
-        <textarea id="feedPostInput" rows="2" placeholder="Share a discreet thought or announcement with the community..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-rose-500 resize-none"></textarea>
-        <div class="flex justify-between items-center">
-          <span class="text-[10px] text-slate-500">🔒 Posts are visible to verified Sway members only.</span>
-          <button onclick="publishFeedPost()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-lg shadow-rose-900/30">Post Update</button>
-        </div>
-      </div>
-
-      <div id="feedPostsContainer" class="space-y-3">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 shadow-md">
-          <div class="flex justify-between items-center text-xs">
-            <span class="font-bold text-rose-400">@AlexAndElena</span>
-            <span class="text-[10px] text-slate-500">2 hours ago</span>
-          </div>
-          <p class="text-xs text-slate-300">Anyone attending the private lounge gathering in BGC this weekend? Let us know if you want to grab drinks beforehand! 🥂</p>
-          <div class="pt-2 flex items-center space-x-4 text-[11px] text-slate-400 border-t border-slate-800/60">
-            <button onclick="this.classList.toggle('text-rose-500')" class="flex items-center space-x-1 hover:text-rose-400"><span>❤️</span> <span>12</span></button>
-            <button onclick="alert('Opening chat...')" class="flex items-center space-x-1 hover:text-slate-200"><span>💬</span> <span>4 replies</span></button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. EVENTS HUB -->
-    <section id="contentEvents" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-xl">
-        <div class="flex justify-between items-start">
-          <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] px-2.5 py-1 rounded-full font-bold">UPCOMING EVENT</span>
-          <span class="text-xs font-mono text-slate-400">Oct 24, 2026</span>
-        </div>
-        <div>
-          <h3 class="text-base font-bold text-white">BGC Secret Rooftop Cocktail Social</h3>
-          <p class="text-xs text-slate-400 mt-1">An exclusive, invite-only evening for local couples & verified singles. Secret venue address sent 2 hours before start.</p>
-        </div>
-        <div class="flex justify-between items-center pt-2 border-t border-slate-800">
-          <span class="text-xs text-emerald-400 font-semibold">18 / 25 Confirmed</span>
-          <button onclick="alert('RSVP Request Sent to Host!')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition">Request RSVP</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. DIRECT MESSAGES -->
-    <section id="contentMessages" class="hidden space-y-3">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Encrypted Conversations</h3>
-        <div class="divide-y divide-slate-800/60">
-          <div onclick="alert('Opening conversation with @SofiaAndDavid')" class="py-3 flex items-center space-x-3 cursor-pointer hover:bg-slate-800/40 px-2 rounded-xl transition">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 to-pink-600 flex items-center justify-center font-bold text-white text-xs">SD</div>
-            <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-center">
-                <span class="text-xs font-bold text-white">@SofiaAndDavid</span>
-                <span class="text-[10px] text-slate-500">10:42 AM</span>
-              </div>
-              <p class="text-xs text-slate-400 truncate">Hey! We saw your profile and loved your vibe...</p>
+            <!-- Swipe Feedback Overlay Stamps -->
+            <div id="stampLike" class="absolute top-8 left-8 border-4 border-emerald-400 text-emerald-400 font-black text-3xl px-4 py-1 rounded-xl rotate-[-15deg] opacity-0 pointer-events-none transition-opacity">
+              LIKE
+            </div>
+            <div id="stampPass" class="absolute top-8 right-8 border-4 border-rose-500 text-rose-500 font-black text-3xl px-4 py-1 rounded-xl rotate-[15deg] opacity-0 pointer-events-none transition-opacity">
+              PASS
             </div>
           </div>
+
+          <!-- Profile Details Section -->
+          <div class="p-5 flex-1 flex flex-col justify-between bg-slate-950/90 backdrop-blur-md">
+            <div>
+              <div class="flex items-baseline justify-between mb-1">
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                  <span id="cardName">Sienna Vance</span>
+                  <span id="cardAge" class="text-lg font-normal text-slate-400">26</span>
+                </h2>
+                <span id="cardLocation" class="text-xs font-medium text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20">
+                  <i class="fa-solid fa-location-dot mr-1"></i> Manila, PH
+                </span>
+              </div>
+              
+              <p id="cardBio" class="text-sm text-slate-300 line-clamp-3 mt-2 leading-relaxed">
+                Architect & designer. Obsessed with minimalist art, espresso, and roof deck lounge sets.
+              </p>
+            </div>
+
+            <!-- Private Vault Request Quick Bar -->
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <div class="text-xs text-slate-400">
+                <i class="fa-solid fa-shield-halved text-rose-400 mr-1"></i> Private Vault Locked
+              </div>
+              <button onclick="openVaultModal()" class="text-xs font-semibold text-rose-400 hover:text-rose-300 underline underline-offset-4">
+                Request Access
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Empty State Deck Placeholder -->
+        <div id="emptyDeck" class="hidden text-center p-8 flex-col items-center justify-center">
+          <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-rose-500 text-2xl mb-4">
+            <i class="fa-solid fa-sparkles"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">You're All Caught Up!</h3>
+          <p class="text-sm text-slate-400 mb-6 max-w-xs">You've viewed all available exclusive profiles in your area for now.</p>
+          <button onclick="resetDeck()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-rose-600 text-white font-semibold text-sm shadow-lg shadow-rose-900/40 hover:opacity-95 transition">
+            Refresh Profiles
+          </button>
+        </div>
+
+      </div>
+
+      <!-- TINDER CARD ACTION CONTROLS -->
+      <div id="cardControls" class="w-full h-[70px] flex items-center justify-center gap-6 mt-2 shrink-0">
+        <!-- PASS BUTTON (CROSS) -->
+        <button onclick="handleSwipe('left')" class="w-14 h-14 rounded-full glass-card border border-rose-500/20 flex items-center justify-center text-rose-500 text-xl shadow-lg hover:bg-rose-500/10 active:scale-95 transition-all">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <!-- VAULT REQUEST BUTTON -->
+        <button onclick="openVaultModal()" class="w-11 h-11 rounded-full glass-card border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm shadow-lg hover:bg-amber-500/10 active:scale-95 transition-all">
+          <i class="fa-solid fa-key"></i>
+        </button>
+
+        <!-- LIKE & CHAT BUTTON (HEART) -->
+        <button onclick="handleSwipe('right')" class="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-600 to-rose-500 flex items-center justify-center text-white text-xl shadow-xl shadow-rose-900/40 hover:brightness-110 active:scale-95 transition-all">
+          <i class="fa-solid fa-heart"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- MESSAGES TAB -->
+    <div id="tab-messages" class="tab-content hidden w-full h-full flex flex-col">
+      <h2 class="text-xl font-bold text-white mb-4">Direct Messages</h2>
+      <div id="chatList" class="flex-1 overflow-y-auto space-y-3 pr-1">
+        <!-- Sample Active Chat -->
+        <div onclick="openChat('Sienna Vance')" class="p-3.5 rounded-2xl glass-card flex items-center gap-3 hover:bg-slate-900/60 transition cursor-pointer">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" class="w-12 h-12 rounded-full object-cover border border-rose-500/30">
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-baseline mb-1">
+              <h4 class="font-bold text-white text-sm truncate">Sienna Vance</h4>
+              <span class="text-[10px] text-slate-400">2m ago</span>
+            </div>
+            <p class="text-xs text-rose-300 font-medium truncate">Matched! Say hello to Sienna...</p>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- 5. MEMBER INVITE MANAGER -->
-    <section id="contentInvites" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
-        <div class="space-y-1">
-          <h3 class="text-base font-bold text-white">Invite Code Generator</h3>
-          <p class="text-xs text-slate-400">Generate single-use invite passes for vetted candidates in your personal network.</p>
+    <!-- PROFILE TAB -->
+    <div id="tab-profile" class="tab-content hidden w-full h-full overflow-y-auto">
+      <div id="myProfileCard" class="glass-card rounded-3xl p-6 border border-white/10">
+        <div class="flex flex-col items-center text-center mb-6">
+          <div class="relative w-24 h-24 mb-3">
+            <img id="myPhoto" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80" class="w-24 h-24 rounded-full object-cover border-2 border-rose-500">
+            <button onclick="showAuthGate()" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-xs text-rose-400">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+          </div>
+          <h3 id="myName" class="text-xl font-bold text-white">Member Profile</h3>
+          <p id="myPassCode" class="text-xs text-rose-400 font-mono mt-1">Pass Code: VIP-MEMBER</p>
         </div>
 
-        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 text-center">
-          <span class="text-[10px] text-slate-500 block uppercase tracking-wider font-semibold">Generated Pass Code</span>
-          <div id="generatedCodeDisplay" class="text-lg font-mono font-bold text-rose-400 tracking-widest">Click below to generate</div>
-          <button onclick="generateMemberInvite()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-rose-900/30">
-            Generate New Single-Use Pass 🎫
+        <div class="space-y-4 text-sm">
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+            <div class="text-xs text-slate-400 mb-1">Bio</div>
+            <p id="myBio" class="text-slate-200">Exclusive Sway member.</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+            <div>
+              <div class="font-semibold text-white">Private Photo Vault</div>
+              <div class="text-xs text-slate-400">3 Photos Uploaded</div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold">Active</span>
+          </div>
+
+          <button onclick="showAuthGate()" class="w-full py-3 rounded-xl bg-slate-900 border border-rose-500/30 text-rose-400 font-semibold hover:bg-rose-950/30 transition">
+            Switch / Sign In Account
           </button>
         </div>
       </div>
-    </section>
-
-    <!-- 6. MY PROFILE TAB -->
-    <section id="contentProfile" class="hidden space-y-4">
-      <div id="profileContentCard" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
-        Loading live cloud profile...
-      </div>
-    </section>
+    </div>
 
   </main>
 
 
-  <!-- ADMIN MODAL -->
-  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-amber-500/40 p-6 rounded-2xl space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-amber-400">Admin Control Center</h3>
-        <button onclick="closeAdminModal()" class="text-slate-500 hover:text-white text-xs">✕ Close</button>
+  <!-- ================= PROMINENT LOGIN & REGISTRATION GATE ================= -->
+  <div id="authGateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl transition-all duration-300">
+    <div class="w-full max-w-sm glass-card rounded-3xl p-6 border border-white/10 shadow-2xl relative">
+      
+      <!-- Modal Header -->
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-rose-500 flex items-center justify-center text-white font-black text-2xl mx-auto mb-3 shadow-lg shadow-rose-900/50">
+          S
+        </div>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Welcome to Sway</h2>
+        <p class="text-xs text-slate-400 mt-1">The invite-only social connection PWA</p>
       </div>
-      <p class="text-xs text-slate-400">Admin management controls active.</p>
+
+      <!-- HIGH VISIBILITY DUAL-TAB TOGGLE (Sign In vs Register) -->
+      <div class="grid grid-cols-2 p-1 bg-slate-900 rounded-xl border border-slate-800 mb-6">
+        <button id="authTabSignInBtn" onclick="switchAuthMode('signin')" class="py-2 text-xs font-bold rounded-lg transition-all bg-gradient-to-r from-brand-600 to-rose-600 text-white shadow-md">
+          Member Sign In
+        </button>
+        <button id="authTabSignUpBtn" onclick="switchAuthMode('signup')" class="py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all">
+          Pass Code Sign Up
+        </button>
+      </div>
+
+      <!-- FORM 1: PROMINENT MEMBER SIGN IN -->
+      <form id="formSignIn" onsubmit="event.preventDefault(); submitSignIn();" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Member Pass Code or Key</label>
+          <input type="text" id="signInPassCode" placeholder="Enter your Pass Code (e.g., SWAY-VIP)" required
+                 class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition text-sm">
+        </div>
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-900/40 hover:opacity-95 active:scale-98 transition">
+          Sign In to Sway
+        </button>
+      </form>
+
+      <!-- FORM 2: NEW PASS CODE REGISTRATION -->
+      <form id="formSignUp" onsubmit="event.preventDefault(); submitSignUp();" class="space-y-3.5 hidden">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Display Name</label>
+          <input type="text" id="signUpName" placeholder="Your Name or Alias" required
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Invite Pass Code</label>
+          <input type="text" id="signUpPassCode" placeholder="VIP Pass Code" required
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Bio / Intro</label>
+          <input type="text" id="signUpBio" placeholder="Short intro about yourself"
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Primary Photo URL</label>
+          <input type="url" id="signUpPhoto" placeholder="https://..." 
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition text-sm">
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-900/40 hover:opacity-95 transition">
+          Create Member Profile
+        </button>
+      </form>
+
     </div>
   </div>
 
 
-  <!-- ==================== FIREBASE CLOUD BACKEND LOGIC ==================== -->
+  <!-- ================= PRIVATE VAULT DUAL PERMISSION MODAL ================= -->
+  <div id="vaultModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all">
+    <div class="w-full max-w-sm glass-card rounded-3xl p-6 border border-rose-500/20 shadow-2xl relative">
+      <button onclick="closeVaultModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="text-center mb-5">
+        <div class="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl mx-auto mb-2">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3 class="text-lg font-bold text-white">Private Photo Vault</h3>
+        <p class="text-xs text-slate-400 mt-1">Request access from <span id="vaultOwnerName" class="text-rose-400 font-semibold">Sienna</span></p>
+      </div>
+
+      <!-- Locked Vault Preview Box -->
+      <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 mb-5 text-center">
+        <i class="fa-solid fa-lock text-3xl text-rose-500 mb-2"></i>
+        <p class="text-xs text-slate-300">This member's private gallery contains intimate photos protected by Sway security.</p>
+      </div>
+
+      <!-- Dual Permission Request Options -->
+      <div class="space-y-3">
+        <button onclick="requestVaultAccess('1-Time View Pass')" class="w-full p-3.5 rounded-xl glass-card border border-rose-500/30 flex items-center justify-between hover:bg-rose-950/30 transition group">
+          <div class="text-left">
+            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <i class="fa-solid fa-bolt text-amber-400"></i> Request 1-Time View Pass
+            </div>
+            <div class="text-[10px] text-slate-400">Self-destructs after opening</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-rose-400 transition"></i>
+        </button>
+
+        <button onclick="requestVaultAccess('Unlimited Access')" class="w-full p-3.5 rounded-xl glass-card border border-rose-500/40 flex items-center justify-between hover:bg-rose-950/40 transition group">
+          <div class="text-left">
+            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <i class="fa-solid fa-infinity text-rose-400"></i> Request Unlimited Access
+            </div>
+            <div class="text-[10px] text-slate-400">Permanent vault access granted by member</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-rose-400 transition"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= MATCH POP-UP MODAL ================= -->
+  <div id="matchModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl hidden transition-all">
+    <div class="w-full max-w-sm text-center">
+      <div class="text-4xl font-black italic tracking-wider bg-gradient-to-r from-rose-400 via-pink-400 to-rose-600 bg-clip-text text-transparent mb-2 animate-bounce">
+        IT'S A MATCH!
+      </div>
+      <p class="text-xs text-slate-300 mb-6">You and <span id="matchedName" class="font-bold text-white">Sienna</span> have liked each other.</p>
+      
+      <div class="flex justify-center items-center gap-4 mb-8">
+        <img id="matchedUserImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" class="w-20 h-20 rounded-full object-cover border-2 border-rose-500 shadow-xl">
+      </div>
+
+      <div class="space-y-3">
+        <button onclick="goToChat()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-900/50 hover:opacity-95 transition">
+          Send a Message Now
+        </button>
+        <button onclick="closeMatchModal()" class="w-full py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 font-semibold text-xs hover:text-white transition">
+          Keep Swiping
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
+  <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full glass-card border border-rose-500/30 text-xs font-semibold text-rose-200 shadow-2xl opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2">
+    <i class="fa-solid fa-circle-info text-rose-400"></i>
+    <span id="toastMsg">Notification</span>
+  </div>
+
+
+  <!-- ================= BOTTOM NAVIGATION BAR ================= -->
+  <nav class="w-full max-w-md glass-nav px-8 py-3 flex justify-between items-center z-30 shrink-0">
+    <button onclick="switchTab('discover')" id="nav-discover" class="flex flex-col items-center gap-1 text-rose-500 transition">
+      <i class="fa-solid fa-fire text-xl"></i>
+      <span class="text-[10px] font-bold">Discover</span>
+    </button>
+    <button onclick="switchTab('messages')" id="nav-messages" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300 transition">
+      <i class="fa-solid fa-comments text-xl"></i>
+      <span class="text-[10px] font-bold">Messages</span>
+    </button>
+    <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300 transition">
+      <i class="fa-solid fa-user text-xl"></i>
+      <span class="text-[10px] font-bold">Profile</span>
+    </button>
+  </nav>
+
+
+  <!-- ================= CLIENT UI JAVASCRIPT ================= -->
   <script>
-    // Toggle between Invite Pass verification and Existing Member Sign-In
-    function toggleSignInView() {
-      document.getElementById("stepInvite").classList.toggle("hidden");
-      document.getElementById("stepLogin").classList.toggle("hidden");
+    // --- AUTH MODAL TAB SWITCHER ---
+    function switchAuthMode(mode) {
+      const signInBtn = document.getElementById('authTabSignInBtn');
+      const signUpBtn = document.getElementById('authTabSignUpBtn');
+      const formSignIn = document.getElementById('formSignIn');
+      const formSignUp = document.getElementById('formSignUp');
+
+      if (mode === 'signin') {
+        signInBtn.className = "py-2 text-xs font-bold rounded-lg transition-all bg-gradient-to-r from-brand-600 to-rose-600 text-white shadow-md";
+        signUpBtn.className = "py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all";
+        formSignIn.classList.remove('hidden');
+        formSignUp.classList.add('hidden');
+      } else {
+        signUpBtn.className = "py-2 text-xs font-bold rounded-lg transition-all bg-gradient-to-r from-brand-600 to-rose-600 text-white shadow-md";
+        signInBtn.className = "py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all";
+        formSignUp.classList.remove('hidden');
+        formSignIn.classList.add('hidden');
+      }
     }
 
-    // Step 1: Verify Invite Code in Firestore (REGISTRATION ONLY)
-    async function verifyInviteCode() {
-      const code = document.getElementById("inviteCodeInput").value.trim().toUpperCase();
-      if (!code) { alert("Please enter a valid invite code."); return; }
+    function showAuthGate() {
+      document.getElementById('authGateModal').classList.remove('hidden');
+    }
 
-      try {
-        const inviteRef = db.collection("invites").doc(code);
-        const doc = await inviteRef.get();
-
-        if (doc.exists && !doc.data().used) {
-          alert("Invite code accepted!");
-          document.getElementById("stepInvite").classList.add("hidden");
-          document.getElementById("stepRegister").classList.remove("hidden");
-        } else {
-          if (code.startsWith("SWY-")) {
-            alert("Invite code accepted (Test Mode)!");
-            document.getElementById("stepInvite").classList.add("hidden");
-            document.getElementById("stepRegister").classList.remove("hidden");
-          } else {
-            alert("Invalid or already used invite code.");
-          }
+    function hideAuthGate() {
+      document.getElementById('authGateModal').classList.add('hidden');
+      if (window.swayApp.currentProfile) {
+        document.getElementById('myName').textContent = window.swayApp.currentProfile.displayName || "Member";
+        document.getElementById('myPassCode').textContent = `Pass Code: ${window.swayApp.currentProfile.passCode || 'VIP'}`;
+        document.getElementById('myBio').textContent = window.swayApp.currentProfile.bio || "Exclusive member.";
+        if (window.swayApp.currentProfile.photoUrl) {
+          document.getElementById('myPhoto').src = window.swayApp.currentProfile.photoUrl;
         }
-      } catch (err) {
-        console.error("Invite check error:", err);
-        document.getElementById("stepInvite").classList.add("hidden");
-        document.getElementById("stepRegister").classList.remove("hidden");
       }
     }
 
-    // Direct Login for existing members
-    async function loginExistingUser() {
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value.trim();
-      if (!email || !password) { alert("Please enter email and password."); return; }
-
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-        document.getElementById("authGateModal").classList.add("hidden");
-      } catch (err) {
-        alert("Login failed: " + err.message);
-      }
+    function submitSignIn() {
+      const passCode = document.getElementById('signInPassCode').value;
+      window.swayAuth.signInWithPassCode(passCode);
     }
 
-    function toggleCoupleOrientation() {
-      const type = document.getElementById("regType").value;
-      const box = document.getElementById("coupleOrientationBox");
-      if (type === "couple") { box.classList.remove("hidden"); }
-      else { box.classList.add("hidden"); }
+    function submitSignUp() {
+      const name = document.getElementById('signUpName').value;
+      const pass = document.getElementById('signUpPassCode').value;
+      const bio = document.getElementById('signUpBio').value;
+      const photo = document.getElementById('signUpPhoto').value;
+      window.swayAuth.registerMember(name, pass, bio, photo);
     }
 
-    function proceedToPhotoUpload() {
-      const handle = document.getElementById("regHandle").value.trim();
-      const agreed = document.getElementById("agreeEula").checked;
-      if (!handle) { alert("Please input your desired username."); return; }
-      if (!agreed) { alert("You must agree to the End User Agreement to proceed."); return; }
+    // --- DECK RENDER & SWIPE LOGIC ---
+    function renderCurrentCard() {
+      const card = document.getElementById('swipeCard');
+      const emptyDeck = document.getElementById('emptyDeck');
+      const controls = document.getElementById('cardControls');
+      const list = window.swayApp.deckProfiles;
+      const idx = window.swayApp.currentIndex;
 
-      document.getElementById("stepRegister").classList.add("hidden");
-      document.getElementById("stepPhoto").classList.remove("hidden");
-    }
-
-    function proceedToEmailVerification() {
-      document.getElementById("stepPhoto").classList.add("hidden");
-      document.getElementById("stepEmail").classList.remove("hidden");
-    }
-
-    // Complete cloud registration + Save Bio text
-    async function completeCloudRegistration() {
-      const email = document.getElementById("regEmail").value.trim();
-      const password = document.getElementById("regPassword").value.trim();
-      const handle = document.getElementById("regHandle").value.trim();
-      const type = document.getElementById("regType").value;
-      const coupleOrientation = document.getElementById("regCoupleOrientation").value;
-      const age = document.getElementById("regAge").value;
-      const location = document.getElementById("regLocation").value;
-      const experience = document.getElementById("regExperience").value;
-      const bio = document.getElementById("regBio").value.trim();
-      const affiliation = document.getElementById("regAffiliation").value;
-
-      const lookingFor = [];
-      document.querySelectorAll('input[name="lookingFor"]:checked').forEach((cb) => {
-        lookingFor.push(cb.value);
-      });
-
-      if (!email || !password) {
-        alert("Please enter a secure email and password.");
+      if (idx >= list.length) {
+        card.classList.add('hidden');
+        controls.classList.add('hidden');
+        emptyDeck.classList.remove('hidden');
+        emptyDeck.classList.add('flex');
         return;
       }
 
-      try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const uid = userCredential.user.uid;
+      card.classList.remove('hidden');
+      controls.classList.remove('hidden');
+      emptyDeck.classList.add('hidden');
+      emptyDeck.classList.remove('flex');
 
-        const userData = {
-          handle: handle,
-          accountType: type,
-          coupleOrientation: type === "couple" ? coupleOrientation : "N/A",
-          age: age,
-          location: location,
-          experience: experience,
-          bio: bio || "No description provided.",
-          affiliation: affiliation,
-          lookingFor: lookingFor,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
+      const p = list[idx];
+      document.getElementById('cardName').textContent = p.displayName || "Member";
+      document.getElementById('cardAge').textContent = p.age || "25";
+      document.getElementById('cardLocation').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${p.location || 'Manila, PH'}`;
+      document.getElementById('cardBio').textContent = p.bio || "No bio provided.";
+      document.getElementById('cardImage').src = p.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80";
+      document.getElementById('cardVaultCount').textContent = p.vaultCount || "3";
+      document.getElementById('vaultOwnerName').textContent = p.displayName?.split(' ')[0] || "Member";
 
-        await db.collection("users").doc(uid).set(userData);
+      // Reset card transforms
+      card.style.transform = 'translate(0px, 0px) rotate(0deg)';
+      card.style.opacity = '1';
+      document.getElementById('stampLike').style.opacity = '0';
+      document.getElementById('stampPass').style.opacity = '0';
+    }
 
-        document.getElementById("navUserHandle").innerText = handle;
-        renderUserProfile(userData);
+    function handleSwipe(direction) {
+      const card = document.getElementById('swipeCard');
+      const list = window.swayApp.deckProfiles;
+      const currentMember = list[window.swayApp.currentIndex];
 
-        document.getElementById("authGateModal").classList.add("hidden");
-        alert("Cloud account created successfully! Welcome to Sway.");
-        loadDiscoverProfiles();
-      } catch (error) {
-        console.error("Registration error:", error);
-        alert("Registration Error: " + error.message);
+      if (direction === 'right') {
+        card.style.transform = 'translate(300px, 0px) rotate(20deg)';
+        card.style.opacity = '0';
+        document.getElementById('stampLike').style.opacity = '1';
+
+        setTimeout(() => {
+          window.swayApp.currentIndex++;
+          renderCurrentCard();
+          // Trigger Match Modal on Like
+          triggerMatch(currentMember);
+        }, 300);
+      } else {
+        card.style.transform = 'translate(-300px, 0px) rotate(-20deg)';
+        card.style.opacity = '0';
+        document.getElementById('stampPass').style.opacity = '1';
+
+        setTimeout(() => {
+          window.swayApp.currentIndex++;
+          renderCurrentCard();
+        }, 300);
       }
     }
 
-    // Auth state listener: Keep user logged in across page reloads
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        document.getElementById("authGateModal").classList.add("hidden");
-        try {
-          const doc = await db.collection("users").doc(user.uid).get();
-          if (doc.exists) {
-            const data = doc.data();
-            document.getElementById("navUserHandle").innerText = data.handle || "@Member";
-            renderUserProfile(data);
-          }
-        } catch (e) { console.error("Error loading user profile:", e); }
+    function resetDeck() {
+      window.swayApp.currentIndex = 0;
+      renderCurrentCard();
+      showToast("Deck refreshed!");
+    }
 
-        loadDiscoverProfiles();
+    // --- MATCH MODAL HANDLERS ---
+    function triggerMatch(member) {
+      document.getElementById('matchedName').textContent = member.displayName || "Member";
+      if (member.photoUrl) {
+        document.getElementById('matchedUserImg').src = member.photoUrl;
       }
-    });
+      document.getElementById('matchModal').classList.remove('hidden');
+    }
 
-    // Fetch all registered users from Firestore and display in Discover tab
-    async function loadDiscoverProfiles() {
-      const deck = document.getElementById("discoverDeckContainer");
-      deck.innerHTML = "";
+    function closeMatchModal() {
+      document.getElementById('matchModal').classList.add('hidden');
+    }
 
-      try {
-        const snapshot = await db.collection("users").orderBy("createdAt", "desc").get();
+    function goToChat() {
+      closeMatchModal();
+      switchTab('messages');
+      showToast("Conversation opened");
+    }
 
-        if (snapshot.empty) {
-          deck.innerHTML = `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
-              No registered members found yet.
-            </div>`;
-          return;
+    // --- VAULT MODAL HANDLERS ---
+    function openVaultModal() {
+      document.getElementById('vaultModal').classList.remove('hidden');
+    }
+
+    function closeVaultModal() {
+      document.getElementById('vaultModal').classList.add('hidden');
+    }
+
+    function requestVaultAccess(type) {
+      closeVaultModal();
+      showToast(`Requested: ${type}`);
+    }
+
+    // --- TAB SWITCHER ---
+    function switchTab(tabId) {
+      window.swayApp.activeTab = tabId;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      // Update Nav Buttons
+      ['discover', 'messages', 'profile'].forEach(id => {
+        const btn = document.getElementById(`nav-${id}`);
+        if (id === tabId) {
+          btn.className = "flex flex-col items-center gap-1 text-rose-500 transition";
+        } else {
+          btn.className = "flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300 transition";
         }
-
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          
-          if (auth.currentUser && doc.id === auth.currentUser.uid) return;
-
-          const cardHtml = `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative transition hover:border-slate-700">
-              <div class="relative h-72 sm:h-80 bg-slate-950 flex items-center justify-center overflow-hidden select-none">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-                <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-2 z-10">
-                  <span class="text-3xl">🔒</span>
-                  <p class="font-bold text-sm text-slate-200">Private Vault Protected</p>
-                  <button onclick="alert('Vault permission request sent to ${data.handle}!')" class="mt-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-rose-900/40 transition">
-                    Request Vault Access
-                  </button>
-                </div>
-              </div>
-
-              <div class="p-5 space-y-3">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h2 class="text-xl font-bold text-white">${data.handle || '@Member'} <span class="text-rose-400 font-normal text-base">(${data.age || 'N/A'})</span></h2>
-                    <p class="text-xs text-rose-400 font-semibold mt-0.5 capitalize">${data.accountType || 'Member'} • ${data.location || 'Discreet'}</p>
-                  </div>
-                  <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2.5 py-1 rounded-full font-semibold">Verified Member</span>
-                </div>
-
-                <p class="text-xs text-slate-300 leading-relaxed italic border-l-2 border-rose-500/40 pl-2.5 py-0.5">
-                  "${data.bio || 'No introduction provided.'}"
-                </p>
-
-                <div class="flex flex-wrap gap-1.5 pt-2">
-                  ${(data.lookingFor || []).map(item => `<span class="bg-slate-800 text-slate-300 border border-slate-700 text-[10px] px-2.5 py-1 rounded-lg">${item}</span>`).join('')}
-                </div>
-              </div>
-            </div>
-          `;
-
-          deck.insertAdjacentHTML('beforeend', cardHtml);
-        });
-      } catch (error) {
-        console.error("Error fetching discover profiles:", error);
-        deck.innerHTML = `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-rose-400">
-            Error loading profiles: ${error.message}
-          </div>`;
-      }
-    }
-
-    // Display user profile card with bio
-    function renderUserProfile(data) {
-      const profileSection = document.getElementById("contentProfile");
-      profileSection.innerHTML = `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
-          <div class="flex items-center space-x-4 border-b border-slate-800 pb-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-rose-600 to-pink-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
-              ${data.handle && data.handle.charAt(1) ? data.handle.charAt(1).toUpperCase() : 'S'}
-            </div>
-            <div>
-              <h2 class="text-lg font-bold text-white">${data.handle}</h2>
-              <p class="text-xs text-rose-400 font-semibold capitalize">${data.accountType} • ${data.location}</p>
-            </div>
-          </div>
-          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1 text-xs">
-            <span class="text-slate-500 block text-[10px] uppercase font-bold tracking-wider">About Us / Introduction</span>
-            <p class="text-slate-300 leading-relaxed italic">${data.bio || 'No introduction added.'}</p>
-          </div>
-          <div class="grid grid-cols-2 gap-3 text-xs">
-            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-              <span class="text-slate-500 block text-[10px] uppercase">Age(s)</span>
-              <span class="text-slate-200 font-bold">${data.age || 'N/A'}</span>
-            </div>
-            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-              <span class="text-slate-500 block text-[10px] uppercase">Experience</span>
-              <span class="text-slate-200 font-bold">${data.experience}</span>
-            </div>
-          </div>
-          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
-            <span class="text-slate-500 block text-[10px] uppercase">Looking For</span>
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              ${(data.lookingFor || []).map(item => `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-md text-[10px] font-medium">${item}</span>`).join('')}
-            </div>
-          </div>
-          <button onclick="auth.signOut().then(() => location.reload())" class="w-full bg-slate-950 hover:bg-slate-800 text-rose-400 border border-slate-800 font-bold py-2.5 rounded-xl text-xs transition">
-            Log Out of Cloud Account
-          </button>
-        </div>
-      `;
-    }
-
-    async function generateMemberInvite() {
-      const newCode = "SWY-" + Math.floor(1000 + Math.random() * 9000) + "-X" + Math.floor(1 + Math.random() * 9);
-      try {
-        await db.collection("invites").doc(newCode).set({
-          used: false,
-          createdBy: auth.currentUser ? auth.currentUser.uid : 'admin',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById("generatedCodeDisplay").innerText = newCode;
-        alert("Invite Pass Created! Code: " + newCode);
-      } catch (err) {
-        console.error("Invite generation error:", err);
-        document.getElementById("generatedCodeDisplay").innerText = newCode;
-      }
-    }
-
-    function publishFeedPost() {
-      const text = document.getElementById("feedPostInput").value.trim();
-      if (!text) return;
-      const handle = document.getElementById("navUserHandle").innerText;
-      
-      const postHtml = `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 shadow-md">
-          <div class="flex justify-between items-center text-xs">
-            <span class="font-bold text-rose-400">${handle}</span>
-            <span class="text-[10px] text-slate-500">Just now</span>
-          </div>
-          <p class="text-xs text-slate-300">${text}</p>
-          <div class="pt-2 flex items-center space-x-4 text-[11px] text-slate-400 border-t border-slate-800/60">
-            <button onclick="this.classList.toggle('text-rose-500')" class="flex items-center space-x-1 hover:text-rose-400"><span>❤️</span> <span>0</span></button>
-          </div>
-        </div>
-      `;
-      document.getElementById("feedPostsContainer").insertAdjacentHTML('afterbegin', postHtml);
-      document.getElementById("feedPostInput").value = "";
-    }
-
-    function switchTab(tabName) {
-      ['discover', 'feed', 'events', 'messages', 'invites', 'profile'].forEach(t => {
-        const content = document.getElementById('content' + capitalize(t));
-        const btn = document.getElementById('tab' + capitalize(t));
-        if (content) content.classList.add('hidden');
-        if (btn) btn.className = 'flex-1 min-w-[75px] py-3 text-slate-400 hover:text-slate-200 transition';
       });
-
-      document.getElementById('content' + capitalize(tabName)).classList.remove('hidden');
-      document.getElementById('tab' + capitalize(tabName)).className = 'flex-1 min-w-[75px] py-3 text-rose-500 border-b-2 border-rose-500 font-bold transition';
     }
 
-    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-    function openAdminModal() { document.getElementById("adminModal").classList.remove("hidden"); }
-    function closeAdminModal() { document.getElementById("adminModal").classList.add("hidden"); }
-
-    window.addEventListener('blur', () => { document.getElementById('privacyBlurOverlay').classList.remove('hidden'); });
-    window.addEventListener('focus', () => { document.getElementById('privacyBlurOverlay').classList.add('hidden'); });
-    document.getElementById('privacyBlurOverlay').addEventListener('click', () => { document.getElementById('privacyBlurOverlay').classList.add('hidden'); });
-
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('pwaInstallBtn').classList.remove('hidden');
-    });
-
-    function triggerPWAInstall() {
-      if (deferredPrompt) { deferredPrompt.prompt(); }
-      else { alert("To install on iOS: Tap Share in Safari and select 'Add to Home Screen'."); }
+    // --- TOAST NOTIFICATION ---
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 3000);
     }
   </script>
+
 </body>
 </html>
